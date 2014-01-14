@@ -40,6 +40,7 @@
 #include <string.h>
 #include <assert.h>
 #include <fstream>
+#include <iostream>
 
 //=============================================================================
 // PGR Includes
@@ -53,6 +54,7 @@
 // Other Includes
 //=============================================================================
 #include "socket.h"
+#include "timing.h"
 
 //=============================================================================
 // Macro Definitions
@@ -65,7 +67,7 @@
 	::ladybugErrorToString( error ) ); \
 	assert( false ); \
 	goto _EXIT; \
-	} 
+	}	
 
 #define IMAGES_TO_GRAB            10
 
@@ -98,6 +100,7 @@ LadybugError
 	{
 		return error;    
 	}
+	 printf("Starting %s (%u)...\n", caminfo.pszModelName, caminfo.serialHead);
 
 	// Load config file
 	printf( "Load configuration file...\n" );
@@ -130,7 +133,7 @@ LadybugError
 
 	// Configure output images in Ladybug library
 	printf( "Configure output images in Ladybug library...\n" );
-	error = ladybugConfigureOutputImages( context, LADYBUG_PANORAMIC | LADYBUG_ALL_RECTIFIED_IMAGES );
+	error = ladybugConfigureOutputImages( context, LADYBUG_PANORAMIC );
 	if (error != LADYBUG_OK)
 	{
 		return error;    
@@ -154,7 +157,9 @@ LadybugError
 		printf( "Starting Ladybug camera...\n" );
 		error = ladybugStart(
 			context,
-			LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8);
+			LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8
+			//LADYBUG_DATAFORMAT_RAW8 
+			);
 		break;
 
 	case LADYBUG_DEVICE_LADYBUG:
@@ -167,11 +172,15 @@ LadybugError
 }
 
 LadybugError sendImages(LadybugContext context, zmq::socket_t &socket){
+	double t_now = clock();	
+	std::string status = "Create empty protobuf message";
+
 	ladybug5_network::ImageMessage message;
 	message.set_id(1);
 	message.set_name("Windows_Client");
+	_TIME
 
-
+	status = "create panorame in graphics card";
 	LadybugError error;
 	ladybug5_network::ImageType img_type;
 	// Stitch the images (inside the graphics card) and retrieve the output to the user's memory
@@ -180,16 +189,20 @@ LadybugError sendImages(LadybugContext context, zmq::socket_t &socket){
 	sprintf( pszOutputName, "pano.jpg");
 	error = ladybugRenderOffScreenImage(context, LADYBUG_PANORAMIC, LADYBUG_BGR, &processedImage);
 	_HANDLE_ERROR
+	_TIME
 
-		//put in msg
+	status = "Write panoramic picture to disk";
+
+	//printf( "Writing image %s...\n", pszOutputName);
+	error = ladybugSaveImage( context, &processedImage, pszOutputName, LADYBUG_FILEFORMAT_JPG);
+	_TIME
+_EXIT:
+
+	status = "read panoramic from disk and create a message";
 	ladybug5_network::Image* image_msg = 0;
 	image_msg = message.add_images();
 	//image_msg->set_number(1);
 	image_msg->set_type(ladybug5_network::LADYBUG_PANORAMIC);
-	
-	printf( "Writing image %s...\n", pszOutputName);
-	error = ladybugSaveImage( context, &processedImage, pszOutputName, LADYBUG_FILEFORMAT_JPG);
-	_EXIT:
 
 	unsigned int size;
 	char* memblock=0;
@@ -206,16 +219,14 @@ LadybugError sendImages(LadybugContext context, zmq::socket_t &socket){
 		file.close();
 		image_msg->set_image(memblock, size);
 		image_msg->set_size(size);
-	
-		printf( "the entire file content is in memory Bytesize: %d", size );
+		_TIME
+		status = "send img over network";
 		socket_write(&socket, &message);
-		socket_read(&socket);
+		_TIME
 	}
 	
 	if(memblock !=0){
 	delete[] memblock;
-
-	
 	
 	_HANDLE_ERROR
 }
@@ -272,19 +283,23 @@ _EXIT:
 	return error;
 }
 
-
 //=============================================================================
 // Main Routine
 //=============================================================================
 int 
 	main( int argc, char* argv[] )
 {
-	printf( "Creating zmq context...\n" );
+	printf("Start ladybug5_windows_client.cpp\nPano w: %i h: %i\n\n",PANORAMIC_IMAGE_WIDTH, 
+		PANORAMIC_IMAGE_HEIGHT);
+	double t_now = clock();	
+	std::string status = "Creating zmq context and connect";
+	
 	zmq::context_t zmq_context(1);
-	zmq::socket_t socket (zmq_context, ZMQ_REQ);
+	zmq::socket_t socket (zmq_context, ZMQ_PUB);
+
 
 	//socket.connect ("tcp://149.201.37.83:28882");
-	socket.connect ("tcp://149.201.37.135:28882");
+	socket.connect ("tcp://149.201.37.83:28882");
 
 	/*while(true){
 		socket_write( &socket, &message);
@@ -292,8 +307,8 @@ int
 		Sleep(1);
 	}*/
 
-	printf( "end zmq context...\n" );
-
+	_TIME
+	status = "Create Ladybug context";
 	LadybugContext context = NULL;
 	LadybugError error;
 	unsigned int uiRawCols = 0;
@@ -301,20 +316,24 @@ int
 	int retry = 10;
 
 	// create ladybug context
-	printf( "Creating ladybug context...\n" );
 	error = ladybugCreateContext( &context );
 	if ( error != LADYBUG_OK )
 	{
 		printf( "Failed creating ladybug context. Exit.\n" );
 		return (1);
 	}
+	_TIME
+
+
+	status = "Initialize and start the camera";
 
 	// Initialize and start the camera
 	error = startCamera( context);
 	_HANDLE_ERROR
+	_TIME
 
-		// Grab an image to inspect the image size
-		printf( "Grabbing image...\n" );
+	// Grab an image to inspect the image size
+	status = "Grab an image to inspect the image size";
 	error = LADYBUG_FAILED;
 	LadybugImage image;
 	while ( error != LADYBUG_OK && retry-- > 0)
@@ -322,61 +341,74 @@ int
 		error = ladybugGrabImage( context, &image ); 
 	}
 	_HANDLE_ERROR
+	_TIME
 
-		// Set the size of the image to be processed
-		if (COLOR_PROCESSING_METHOD == LADYBUG_DOWNSAMPLE4 || 
-			COLOR_PROCESSING_METHOD == LADYBUG_MONO)
-		{
-			uiRawCols = image.uiCols / 2;
-			uiRawRows = image.uiRows / 2;
-		}
-		else
-		{
-			uiRawCols = image.uiCols;
-			uiRawRows = image.uiRows;
-		}
+	status  ="inspect image size";
+	// Set the size of the image to be processed
+	if (COLOR_PROCESSING_METHOD == LADYBUG_DOWNSAMPLE4 || 
+		COLOR_PROCESSING_METHOD == LADYBUG_MONO)
+	{
+		uiRawCols = image.uiCols / 2;
+		uiRawRows = image.uiRows / 2;
+	}
+	else
+	{
+		uiRawCols = image.uiCols;
+		uiRawRows = image.uiRows;
+	}
+	_TIME
 
-		// Initialize alpha mask size - this can take a long time if the
-		// masks are not present in the current directory.
-		printf( "Initializing alpha masks (this may take some time)...\n" );
-		error = ladybugInitializeAlphaMasks( context, uiRawCols, uiRawRows );
+	// Initialize alpha mask size - this can take a long time if the
+	// masks are not present in the current directory.
+	status = "Initializing alpha masks (this may take some time)...";
+	error = ladybugInitializeAlphaMasks( context, uiRawCols, uiRawRows );
+	_HANDLE_ERROR
+	_TIME
+
+	while(true)
+	{
+		printf("\nGrab Image loop...\n");
+		// Grab an image from the camera
+		status = "grab image";
+		error = ladybugGrabImage(context, &image); 
 		_HANDLE_ERROR
+		_TIME
 
-			// Process loop
-			printf( "Endless loop...\n" );
-		while(true)
-		{
-			//printf( "Processing image %d...\n", );
+			// Convert the image to 6 RGB buffers
+		status = "convert image";
+		error = ladybugConvertImage(context, &image, NULL);
+		_HANDLE_ERROR
+		_TIME
 
-			// Grab an image from the camera
-			error = ladybugGrabImage(context, &image); 
-			_HANDLE_ERROR
+			// Send the RGB buffers to the graphics card
+		status = "ladybugUpdateTextures";
+		error = ladybugUpdateTextures(context, LADYBUG_NUM_CAMERAS, NULL);
+		_HANDLE_ERROR
+		_TIME
 
-				// Convert the image to 6 RGB buffers
-			error = ladybugConvertImage(context, &image, NULL);
-			_HANDLE_ERROR
+		//error = saveImages(context, i);
+		printf("Sending...\n");
+		error = sendImages(context, socket);
+		status = "Sum sending image";
+		_TIME
+		/*message="read from socket";
+		socket_read(&socket);
+		_TIME*/
 
-				// Send the RGB buffers to the graphics card
-			error = ladybugUpdateTextures(context, LADYBUG_NUM_CAMERAS, NULL);
-			_HANDLE_ERROR
+	}
 
-			//error = saveImages(context, i);
-			error = sendImages(context, socket);
-
-		}
-
-		printf("Done.\n");
+	printf("Done.\n");
 
 _EXIT:
-		//
-		// clean up
-		//
+	//
+	// clean up
+	//
 
-		ladybugStop( context );
-		ladybugDestroyContext( &context );
+	ladybugStop( context );
+	ladybugDestroyContext( &context );
 
-		printf("<PRESS ANY KEY TO EXIT>");
-		_getch();
-		return 0;
+	printf("<PRESS ANY KEY TO EXIT>");
+	_getch();
+	return 0;
 }
 

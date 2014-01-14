@@ -254,6 +254,7 @@
     <ClInclude Include="protobuf\imageMessage.pb.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="socket.h" />
+    <ClInclude Include="timing.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\icons\PtGreyExample.ico" />
