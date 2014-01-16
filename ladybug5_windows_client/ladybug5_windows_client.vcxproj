@@ -251,6 +251,7 @@
     <ResourceCompile Include="ladybug5_windows_client.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ladybug5_windows_client.h" />
     <ClInclude Include="protobuf\imageMessage.pb.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="socket.h" />
