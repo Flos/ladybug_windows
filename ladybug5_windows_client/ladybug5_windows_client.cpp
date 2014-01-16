@@ -55,6 +55,7 @@
 //=============================================================================
 #include "socket.h"
 #include "timing.h"
+#include "turbojpeg.h"
 
 //=============================================================================
 // Macro Definitions
@@ -65,24 +66,24 @@
 	{ \
 	printf( "Error! Ladybug library reported %s\n", \
 	::ladybugErrorToString( error ) ); \
-	assert( false ); \
+	assert( true ); \
 	goto _EXIT; \
 	}	
 
 #define IMAGES_TO_GRAB            10
 
 // The size of the stitched image
-#define PANORAMIC_IMAGE_WIDTH    2048
-#define PANORAMIC_IMAGE_HEIGHT   1024
+#define PANORAMIC_IMAGE_WIDTH    8048
+#define PANORAMIC_IMAGE_HEIGHT   4024
 
-#define COLOR_PROCESSING_METHOD   LADYBUG_DOWNSAMPLE4     // The fastest color method suitable for real-time usages
-//#define COLOR_PROCESSING_METHOD   LADYBUG_HQLINEAR          // High quality method suitable for large stitched images
+//#define COLOR_PROCESSING_METHOD   LADYBUG_DOWNSAMPLE4     // The fastest color method suitable for real-time usages
+#define COLOR_PROCESSING_METHOD   LADYBUG_HQLINEAR          // High quality method suitable for large stitched images
 
 //
 // This function reads an image from camera
 //
 LadybugError
-	startCamera( LadybugContext context)
+	initCamera( LadybugContext context)
 {    
 	// Initialize camera
 	printf( "Initializing camera...\n" );
@@ -92,16 +93,6 @@ LadybugError
 		return error;    
 	}
 
-	// Get camera info
-	printf( "Getting camera info...\n" );
-	LadybugCameraInfo caminfo;
-	error = ladybugGetCameraInfo( context, &caminfo );
-	if (error != LADYBUG_OK)
-	{
-		return error;    
-	}
-	 printf("Starting %s (%u)...\n", caminfo.pszModelName, caminfo.serialHead);
-
 	// Load config file
 	printf( "Load configuration file...\n" );
 	error = ladybugLoadConfig( context, NULL);
@@ -109,9 +100,13 @@ LadybugError
 	{
 		return error;    
 	}
+	return error;
+}
 
+LadybugError configureLadybugForPanoramic(LadybugContext context){
+	
 	// Set the panoramic view angle
-	error = ladybugSetPanoramicViewingAngle( context, LADYBUG_FRONT_0_POLE_5);
+	LadybugError error = ladybugSetPanoramicViewingAngle( context, LADYBUG_FRONT_0_POLE_5);
 	if (error != LADYBUG_OK)
 	{
 		return error;    
@@ -148,6 +143,19 @@ LadybugError
 	{
 		return error;    
 	}
+	return error;
+}
+
+LadybugError startLadybug(LadybugContext context){
+	// Get camera info
+	printf( "Getting camera info...\n" );
+	LadybugCameraInfo caminfo;
+	LadybugError error = ladybugGetCameraInfo( context, &caminfo );
+	if (error != LADYBUG_OK)
+	{
+		return error;    
+	}
+	printf("Starting %s (%u)...\n", caminfo.pszModelName, caminfo.serialHead);
 
 	switch( caminfo.deviceType )
 	{
@@ -157,6 +165,7 @@ LadybugError
 		printf( "Starting Ladybug camera...\n" );
 		error = ladybugStart(
 			context,
+			//LADYBUG_DATAFORMAT_JPEG8 
 			LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8
 			//LADYBUG_DATAFORMAT_RAW8 
 			);
@@ -180,9 +189,11 @@ LadybugError sendImages(LadybugContext context, zmq::socket_t &socket){
 	message.set_name("Windows_Client");
 	_TIME
 
-	status = "create panorame in graphics card";
+	
 	LadybugError error;
 	ladybug5_network::ImageType img_type;
+
+	status = "create panorame in graphics card";
 	// Stitch the images (inside the graphics card) and retrieve the output to the user's memory
 	LadybugProcessedImage processedImage;
 	char pszOutputName[256];
@@ -220,6 +231,7 @@ _EXIT:
 		image_msg->set_image(memblock, size);
 		image_msg->set_size(size);
 		_TIME
+
 		status = "send img over network";
 		socket_write(&socket, &message);
 		_TIME
@@ -229,14 +241,11 @@ _EXIT:
 	delete[] memblock;
 	
 	_HANDLE_ERROR
+	}
+
+	return error;
 }
 
-
-return error;
-
-
-
-}
 LadybugError saveImages(LadybugContext context, int i){
 
 	LadybugError error;
@@ -325,13 +334,23 @@ int
 	_TIME
 
 
-	status = "Initialize and start the camera";
+	status = "Initialize the camera";
 
-	// Initialize and start the camera
-	error = startCamera( context);
+	// Initialize  the camera
+	error = initCamera(context);
 	_HANDLE_ERROR
 	_TIME
 
+	status = "configure for panoramic stitching";
+	error = configureLadybugForPanoramic(context);
+	_HANDLE_ERROR
+	_TIME
+
+	status = "start ladybug";
+	error = startLadybug(context);
+	_HANDLE_ERROR
+	_TIME
+	
 	// Grab an image to inspect the image size
 	status = "Grab an image to inspect the image size";
 	error = LADYBUG_FAILED;
@@ -343,7 +362,7 @@ int
 	_HANDLE_ERROR
 	_TIME
 
-	status  ="inspect image size";
+	status = "inspect image size";
 	// Set the size of the image to be processed
 	if (COLOR_PROCESSING_METHOD == LADYBUG_DOWNSAMPLE4 || 
 		COLOR_PROCESSING_METHOD == LADYBUG_MONO)
@@ -365,8 +384,13 @@ int
 	_HANDLE_ERROR
 	_TIME
 
+	tjhandle _jpegCompressor = tjInitCompress();
+_EXIT:	
+
 	while(true)
 	{
+		try{
+
 		printf("\nGrab Image loop...\n");
 		// Grab an image from the camera
 		status = "grab image";
@@ -374,32 +398,88 @@ int
 		_HANDLE_ERROR
 		_TIME
 
-			// Convert the image to 6 RGB buffers
-		status = "convert image";
-		error = ladybugConvertImage(context, &image, NULL);
+		status = "Convert images ti 6 RGB buffers";
+		// Convert the image to 6 RGB buffers
+        error = ladybugConvertImage(context, &image, NULL);
+        _HANDLE_ERROR
+		_TIME
+
+		status = "Send RGB buffers to graphics card";
+        // Send the RGB buffers to the graphics card
+        error = ladybugUpdateTextures(context, LADYBUG_NUM_CAMERAS, NULL);
+        _HANDLE_ERROR
+		_TIME
+
+		status = "create panorame in graphics card";
+		// Stitch the images (inside the graphics card) and retrieve the output to the user's memory
+		LadybugProcessedImage processedImage;
+		char pszOutputName[256];
+		sprintf( pszOutputName, "pano.jpg");
+		error = ladybugRenderOffScreenImage(context, LADYBUG_PANORAMIC, LADYBUG_BGR, &processedImage);
 		_HANDLE_ERROR
 		_TIME
 
-			// Send the RGB buffers to the graphics card
-		status = "ladybugUpdateTextures";
-		error = ladybugUpdateTextures(context, LADYBUG_NUM_CAMERAS, NULL);
-		_HANDLE_ERROR
+		status = "jpg encode image";
+		const int JPEG_QUALITY = 85;
+		const int COLOR_COMPONENTS = 3;
+		int _width = processedImage.uiCols; 
+		int _height = processedImage.uiRows;
+		long unsigned int _jpegSize = 0;
+		unsigned char* _compressedImage = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
+		
+		
+
+		tjCompress2(_jpegCompressor, processedImage.pData, _width, 0, _height, TJPF_BGR,
+				  &_compressedImage, &_jpegSize, TJSAMP_420, JPEG_QUALITY,
+				  TJFLAG_FASTDCT);
+
+		_TIME
+		
+		status = "write file to disk";
+		//std::ofstream file("test.jpg", std::ios::binary);
+		char* jpgCompressed = new char[image.uiDataSizeBytes];
+		memcpy(jpgCompressed, _compressedImage, _jpegSize);
+		tjFree(_compressedImage);
+
+		//file.write(jpgCompressed, _jpegSize);
+		//file.close();
 		_TIME
 
 		//error = saveImages(context, i);
 		printf("Sending...\n");
-		error = sendImages(context, socket);
-		status = "Sum sending image";
+		ladybug5_network::ImageMessage message;
+		message.set_id(1);
+		message.set_name("Windows_Client");
+	
+		LadybugError error;
+		ladybug5_network::ImageType img_type;
+		status = "read panoramic from disk and create a message";
+		ladybug5_network::Image* image_msg = 0;
+		image_msg = message.add_images();
+		//image_msg->set_number(1);
+		image_msg->set_image(jpgCompressed, _jpegSize);
+		image_msg->set_size(_jpegSize);
+		image_msg->set_type(ladybug5_network::LADYBUG_PANORAMIC);
+		status = "send img over network";
+		socket_write(&socket, &message);
+		//error = sendImages(context, socket);		
+		delete jpgCompressed;
 		_TIME
+		
+		status = "Sum sending image";
 		/*message="read from socket";
 		socket_read(&socket);
 		_TIME*/
-
+		}
+		catch(std::exception e){
+			Sleep(1);
+			printf("Exception, trying to recover\n");
+		};
 	}
-
+	tjDestroy(_jpegCompressor);
 	printf("Done.\n");
 
-_EXIT:
+
 	//
 	// clean up
 	//
