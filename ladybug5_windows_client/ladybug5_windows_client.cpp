@@ -4,8 +4,8 @@
 #define PANORAMIC_IMAGE_HEIGHT   4000
 #define PANORAMIC_IMAGE_WIDTH    8000
 
-//#define COLOR_PROCESSING_METHOD   LADYBUG_DOWNSAMPLE4     // The fastest color method suitable for real-time usages
-#define COLOR_PROCESSING_METHOD   LADYBUG_HQLINEAR          // High quality method suitable for large stitched images
+#define COLOR_PROCESSING_METHOD   LADYBUG_DOWNSAMPLE4     // The fastest color method suitable for real-time usages
+//#define COLOR_PROCESSING_METHOD   LADYBUG_HQLINEAR          // High quality method suitable for large stitched images
 
 //
 // This function reads an image from camera
@@ -22,7 +22,7 @@ LadybugError
 	while(error != LADYBUG_OK && i<10){
 		++i;
 		printf( "Initializing camera...try %i\n", i );
-		Sleep(500);
+		Sleep(2500);
 		error = ladybugInitializeFromIndex( context, 0 );
 	}
 	if (error != LADYBUG_OK)
@@ -110,8 +110,8 @@ LadybugError startLadybug(LadybugContext context){
 		error = ladybugStart(
 			context,
 			//LADYBUG_DATAFORMAT_JPEG8 
-			LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8
-			//LADYBUG_DATAFORMAT_RAW8 
+			//LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8
+			LADYBUG_DATAFORMAT_RAW8 
 			);
 		break;
 
@@ -256,8 +256,10 @@ _RESTART:
 			_HANDLE_ERROR
 			_TIME
 	
+			
 			ladybug5_network::ImageMessage message = createMessage();
-			addImageToMessage(message, processedImage.pData, &msg_timestamp, ladybug5_network::LADYBUG_PANORAMIC, processedImage.uiCols, processedImage.uiRows );
+			status = "Add image to message";
+			addImageToMessage(&message, processedImage.pData, &msg_timestamp, ladybug5_network::LADYBUG_PANORAMIC, processedImage.uiCols, processedImage.uiRows );
 			_TIME
 
 			printf("Sending...\n");
@@ -265,7 +267,7 @@ _RESTART:
 			_TIME
 
 			socket_write(&socket, &message);
-			status = "Sum sending image";
+			//status = "Sum sending image";
 			/*message="read from socket";
 			socket_read(&socket);
 			_TIME*/
@@ -302,7 +304,7 @@ ladybug5_network::ImageMessage createMessage(){
 	return message;
 }
 
-void addImageToMessage(ladybug5_network::ImageMessage &message,  unsigned char* uncompressedBGRImageBuffer, ladybug5_network::LadybugTimeStamp *timestamp, ladybug5_network::ImageType img_type, int _width, int _height){
+void addImageToMessage(ladybug5_network::ImageMessage *message,  unsigned char* uncompressedBGRImageBuffer, ladybug5_network::LadybugTimeStamp *timestamp, ladybug5_network::ImageType img_type, int _width, int _height){
 	//encode to jpg
 	const int COLOR_COMPONENTS = 3;
 	unsigned long imgSize = 0;
@@ -317,11 +319,11 @@ void addImageToMessage(ladybug5_network::ImageMessage &message,  unsigned char* 
 	
 	//append to message
 	ladybug5_network::Image* image_msg = 0;
-	image_msg = message.add_images();
+	image_msg = message->add_images();
 	image_msg->set_image(_compressedImage, imgSize);
 	image_msg->set_size(imgSize);
 	image_msg->set_type(img_type);
-	image_msg->set_allocated_time(timestamp);
+	image_msg->set_allocated_time(new ladybug5_network::LadybugTimeStamp(*timestamp));
 	tjFree(_compressedImage);
 }
 
