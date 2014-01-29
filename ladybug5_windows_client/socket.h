@@ -15,10 +15,10 @@
 #include "zmq.hpp"
 #include "time.h"
 
-ladybug5_network::ImageMessage*
+ladybug5_network::pbMessage*
 socket_read(zmq::socket_t* socket);
 
 void
-socket_write(zmq::socket_t* socket, ladybug5_network::ImageMessage*);
+socket_write(zmq::socket_t* socket, ladybug5_network::pbMessage*);
 
 #endif /* SOCKET_H_ */
