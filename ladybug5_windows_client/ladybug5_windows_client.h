@@ -26,6 +26,7 @@
 #include "ladybugToString.h"
 #include <boost\thread.hpp>
 #include <boost\circular_buffer.hpp>
+#include <assert.h>
 //=============================================================================
 // Macro Definitions
 //=============================================================================
@@ -47,8 +48,10 @@ struct myThread{
 
 LadybugError initCamera(LadybugContext context);
 void initBuffers(unsigned char** arpBuffers, unsigned int number, unsigned int width, unsigned int height, unsigned int dimensions = 4);
+void initBuffersWitPicture(unsigned char** arpBuffers, long unsigned int* size);
 LadybugError configureLadybugForPanoramic(LadybugContext context);
 LadybugError startLadybug(LadybugContext context);
 ladybug5_network::pbMessage createMessage(std::string name, std::string camera);
+void compressImageInMsg(ladybug5_network::pbMessage *message);
 void addImageToMessage(ladybug5_network::pbMessage *message,  unsigned char* uncompressedBGRImageBuffer, TJPF color, ladybug5_network::LadybugTimeStamp *timestamp, ladybug5_network::ImageType img_type, int _width, int _height);
 void jpegEncode(unsigned char* _compressedImage, unsigned long *_jpegSize, unsigned char* srcBuffer, int JPEG_QUALITY, int _width, int _height );
