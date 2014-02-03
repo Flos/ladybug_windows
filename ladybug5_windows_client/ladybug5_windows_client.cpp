@@ -1,5 +1,6 @@
 #include "ladybug5_windows_client.h"
 
+
 #define PANORAMIC false
 #define THREADING false
 #define POSTPROCESSING true
@@ -175,6 +176,7 @@ void addImageToMessageParellel(ladybug5_network::pbMessage *message,  unsigned c
 	}
 }
 
+
 void convertAndSend(LadybugContext context, unsigned char** arpBuffers, zmq::socket_t *socket, unsigned int uiRawCols, unsigned int uiRawRows){
 	double t_now = clock();
 	LadybugImage image;
@@ -192,7 +194,8 @@ void convertAndSend(LadybugContext context, unsigned char** arpBuffers, zmq::soc
 	{
 		addImageToMessage(&message, arpBuffers[uiCamera], TJPF_BGRA, &msg_timestamp, (ladybug5_network::ImageType) ( 1 << uiCamera), uiRawCols, uiRawRows );
 	}
-	socket_write(socket, &message);
+	throw new std::exception("Not implemented");
+//	socket_write(socket, &message);
 	std::string  status = "Grabbing, converting and sending";
 	_TIME
 }
@@ -363,16 +366,19 @@ _EXIT:
 	goto _RESTART;
 }
 
-void ladybugSimulator(zmq::context_t* p_zmqcontext, std::string imageReciever){
-	std::string connection = "inproc://" + imageReciever;
+void ladybugSimulator(zmq::context_t* p_zmqcontext ){
+	printf("Simulator Thread: init\n");
+				
+	std::string connection = "inproc://uncompressed";
+
 	std::string status = "hallo welt";
 	
 	//zmq::context_t *context = p_zmqcontext;
-	zmq::socket_t socket(*p_zmqcontext, ZMQ_PUSH);
-	int val = 12; //buffer size
+	zmq::socket_t socket(*p_zmqcontext, ZMQ_REQ /*ZMQ_DEALER*/); //ZMQ_PUSH);
+	unsigned int val = 12; //buffer size
 	socket.setsockopt(ZMQ_RCVHWM, &val, sizeof(val));  //prevent buffer get overfilled
 	socket.setsockopt(ZMQ_SNDHWM, &val, sizeof(val));  //prevent buffer get overfilled
-	socket.bind(connection.c_str());
+	socket.connect(connection.c_str());
 
 	unsigned char* arpBuffers[ LADYBUG_NUM_CAMERAS ];
 	
@@ -387,13 +393,15 @@ void ladybugSimulator(zmq::context_t* p_zmqcontext, std::string imageReciever){
 	unsigned long size[LADYBUG_NUM_CAMERAS];
 
 	initBuffersWitPicture(arpBuffers, size);
+	ladybug5_network::LadybugTimeStamp msg_timestamp;
+	ladybug5_network::pbMessage message = createMessage("windows","ladybug5");
 	while(true)
 	{
 			status = "Grabbing loop...";
 			double loopstart = t_now = clock();	
 			double t_now = loopstart;	
 	
-			ladybug5_network::LadybugTimeStamp msg_timestamp;
+			
 			msg_timestamp.set_ulcyclecount(4);
 			msg_timestamp.set_ulcycleoffset(2);
 			msg_timestamp.set_ulcycleseconds(5);
@@ -402,8 +410,10 @@ void ladybugSimulator(zmq::context_t* p_zmqcontext, std::string imageReciever){
 
 			for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 			{
-				ladybug5_network::pbMessage message = createMessage("windows","ladybug5");
 				// send message to queue insted
+				message.Clear();
+				message.set_name("windows");
+				message.set_camera("ladybug5");
 				ladybug5_network::pbImage* image_msg = 0;
 				image_msg = message.add_images();
 				image_msg->set_image(arpBuffers[uiCamera],  size[uiCamera]);
@@ -418,75 +428,136 @@ void ladybugSimulator(zmq::context_t* p_zmqcontext, std::string imageReciever){
 
 				zmq::message_t msg(message.ByteSize());
 				message.SerializeToArray(msg.data(), message.ByteSize());
-				socket.send(msg);				
-				std::cout << "send message with size: " << message.ByteSize() << std::endl;
+				//socket.send("",ZMQ_MORE);
+				socket.send(msg);
+				zmq::message_t done;
+				socket.recv(&done);
+				std::cout << "Simulator Thread: send message with size: " << message.ByteSize() << std::endl;
+				Sleep(1000);
 			}
 			
 			_TIME
 		}
 }
 
-void compresseionThread(zmq::context_t* p_zmqcontext, std::string compressedImageReciever)
+void compresseionThread(zmq::context_t* p_zmqcontext, int i)
 {
+	printf("Compression Thread%i: init \n", i);
 	zmq::context_t *context = p_zmqcontext;
-	zmq::socket_t socket(*context, ZMQ_PULL);
-	int valIn = 1; //buffer size
-	socket.setsockopt(ZMQ_RCVHWM, &valIn, sizeof(valIn));  //prevent buffer get overfilled
-	socket.setsockopt(ZMQ_SNDHWM, &valIn, sizeof(valIn));  //prevent buffer get overfilled
-	socket.connect("inproc://uncompressed");
+	zmq::socket_t uncompressed(*context, ZMQ_REP); //ZMQ_PULL);
+	unsigned int valIn = 2; //buffer size
+	uncompressed.setsockopt(ZMQ_RCVHWM, &valIn, sizeof(valIn));  //prevent buffer get overfilled
+	uncompressed.setsockopt(ZMQ_SNDHWM, &valIn, sizeof(valIn));  //prevent buffer get overfilled
+	uncompressed.connect("inproc://workers");
 
-	int valOut = 1;
-	zmq::socket_t publisher(*context, ZMQ_PUB);
-	publisher.setsockopt(ZMQ_RCVHWM, &valOut, sizeof(valOut));  //prevent buffer get overfilled
-	publisher.setsockopt(ZMQ_SNDHWM, &valOut, sizeof(valOut));  //prevent buffer get overfilled
+	unsigned int valOut = 2;
+	zmq::socket_t compressed(*context, ZMQ_DEALER);
+	compressed.setsockopt(ZMQ_RCVHWM, &valOut, sizeof(valOut));  //prevent buffer get overfilled
+	compressed.setsockopt(ZMQ_SNDHWM, &valOut, sizeof(valOut));  //prevent buffer get overfilled
+	compressed.connect("inproc://pb_message");
 
-	std::string connection = "tcp://149.201.37.83:28882";
-	publisher.connect(connection.c_str());
+	std::string ready = "ready";
+	zmq::message_t reply(ready.length());
+    memcpy(reply.data(), ready.c_str(), ready.length());
+	ladybug5_network::pbMessage msg;// = new ladybug5_network::pbMessage();
 
-
-	
+	while(true)
+	{
+		msg.Clear();
 		zmq::message_t imgRaw;
-        socket.recv (&imgRaw);
+		uncompressed.recv (&imgRaw);
+		while (imgRaw.size()==0){
+			uncompressed.recv (&imgRaw);
+		}
+		
+		msg.ParseFromArray(imgRaw.data(), (int)imgRaw.size());
 
-		ladybug5_network::pbMessage* msg = new ladybug5_network::pbMessage();
-		msg->ParseFromArray(imgRaw.data(), (int)imgRaw.size());
-
-		std::cout << "Recived image message with size: " <<  msg->ByteSize() << std::endl;
-		//std::cout << "Reviebed: " << msg->DebugString();
-		assert(msg->images(0).image().length()!=0);
-		assert(msg->images(0).image().size()!=0);
+		assert(msg.images(0).image().length()!=0);
+		assert(msg.images(0).image().size()!=0);
 	
-		compressImageInMsg(msg);
-		std::cout << "After compression image message with size: " <<  msg->ByteSize() << std::endl;
+		compressImageInMsg(&msg);
+		
+		zmq::message_t pub(msg.ByteSize());
+		msg.SerializePartialToArray(pub.data(), msg.ByteSize());
+		std::cout << "Compression Thread"<< i <<": sending image: " << msg.ByteSize() << std::endl;
+		compressed.send(pub);
+		uncompressed.send(reply);
+	}
+}
 
-		zmq::message_t pub(msg->ByteSize());
-		msg->SerializePartialToArray(pub.data(), msg->ByteSize());
-		publisher.send(pub);
-		std::cout << "published image: " << msg->ByteSize() << std::endl;
+void sendingThread(zmq::context_t* p_zmqcontext, std::string rosmaster){
+	printf("Sending Thread: init connecting to %s\n", rosmaster.c_str());
+	zmq::context_t *context = p_zmqcontext;
+	zmq::socket_t sink(*context, ZMQ_DEALER); //PULL);
+	unsigned int valIn = 12; //buffer size
+	sink.setsockopt(ZMQ_RCVHWM, &valIn, sizeof(valIn));  //prevent buffer get overfilled
+	sink.setsockopt(ZMQ_SNDHWM, &valIn, sizeof(valIn));  //prevent buffer get overfilled
+	sink.bind("inproc://pb_message");
+
+	zmq::socket_t publisher(*context, ZMQ_PUB);
+	unsigned int val = 12; //buffer size
+	publisher.setsockopt(ZMQ_RCVHWM, &val, sizeof(val));  //prevent buffer get overfilled
+	publisher.setsockopt(ZMQ_SNDHWM, &val, sizeof(val));  //prevent buffer get overfilled
+	publisher.connect(rosmaster.c_str());
+
+	while(true){
+		zmq::message_t imgRaw;
+        sink.recv (&imgRaw);
+
+		zmq::message_t delimitter;
+        sink.recv (&delimitter);
+		
+		imgRaw.rebuild();
+		publisher.send(delimitter);
+		printf("Sending Thread: send message\n %i, %i\n",delimitter.size(), imgRaw.size());
+	}
 }
 
 void main( int argc, char* argv[] ){
-	zmq::context_t* context = new zmq::context_t(1);
-	zmq::socket_t ladybugSocket (*context, ZMQ_ROUTER);
+	zmq::context_t context(1);
+	
+	zmq::socket_t grabber(context, ZMQ_ROUTER);
+	unsigned int val = 12; //buffer size
+	grabber.setsockopt(ZMQ_RCVHWM, &val, sizeof(val));  //prevent buffer get overfilled
+	grabber.setsockopt(ZMQ_SNDHWM, &val, sizeof(val));  //prevent buffer get overfilled
+	grabber.bind("inproc://uncompressed");
+ 
+	zmq::socket_t workers(context, ZMQ_DEALER);
+	workers.setsockopt(ZMQ_RCVHWM, &val, sizeof(val));  //prevent buffer get overfilled
+	grabber.setsockopt(ZMQ_SNDHWM, &val, sizeof(val));  //prevent buffer get overfilled
+	zmq_bind(workers, "inproc://workers");
+	
+
+//  Start a queue device zmq_device (ZMQ_QUEUE, frontend, backend)
+	/*zmq::socket_t ladybugSocket (*context, ZMQ_ROUTER);
     ladybugSocket.bind("inproc://uncompressed");
 
     zmq::socket_t workers (*context, ZMQ_DEALER);
-    workers.bind("inproc://worker");
+    workers.bind("inproc://worker");*/
 
 	//boost::thread grab(ladybugThread, &context, "uncompressed");
-	boost::thread grab(ladybugSimulator, context, "uncompressed");
+	
+	//zmq::proxy(ladybugSocket, workers, NULL);
+	//std::string ros_master = "tcp://149.201.37.83:28882";
+	std::string ros_master = "tcp://192.168.1.178:28882";
+	//std::string connection = "tcp://149.201.37.61:28882"; //Kai
+	//std::string connection = "tcp://192.168.0.5:28882"; //Kai
 
+	boost::thread_group threads;
+	threads.create_thread(std::bind(ladybugSimulator, &context)); //ladybug grabbing thread
+	threads.create_thread(std::bind(sendingThread, &context, ros_master)); // sending thread
+	
 	for(int i=0; i< 3; ++i){
-		boost::thread compress(compresseionThread, context, "hallo");
+		threads.create_thread(std::bind(compresseionThread, &context, i)); //worker thread (jpg-compression)
 	}
-	zmq::proxy(ladybugSocket, workers, NULL);
-	zmq::
+	
+	zmq_proxy(grabber, workers, NULL); 
 
-	while(true){
-		Sleep(10000);
-	}
     //  Launch pool of worker threads
 	std::cout << "Clean exit" << std::endl;
+	Sleep(1000);
+	std::printf("<PRESS ANY KEY TO EXIT>");
+	_getch();
 }
 
 //=============================================================================

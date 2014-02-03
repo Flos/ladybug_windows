@@ -20,13 +20,18 @@
 //=============================================================================
 // Other Includes
 //=============================================================================
-#include "socket.h"
 #include "timing.h"
 #include "turbojpeg.h"
 #include "ladybugToString.h"
 #include <boost\thread.hpp>
 #include <boost\circular_buffer.hpp>
 #include <assert.h>
+#include "protobuf/imageMessage.pb.h"
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/io/zero_copy_stream_impl.h"
+#include "zmq.hpp"
+//#include "zmsg.hpp"
+#include "time.h"
 //=============================================================================
 // Macro Definitions
 //=============================================================================
