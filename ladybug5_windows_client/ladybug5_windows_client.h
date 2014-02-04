@@ -1,3 +1,4 @@
+#pragma once
 //=============================================================================
 // System Includes
 //=============================================================================
@@ -20,18 +21,19 @@
 //=============================================================================
 // Other Includes
 //=============================================================================
-#include "timing.h"
 #include "turbojpeg.h"
-#include "ladybugToString.h"
 #include <boost\thread.hpp>
 #include <boost\circular_buffer.hpp>
 #include <assert.h>
 #include "protobuf/imageMessage.pb.h"
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/io/zero_copy_stream_impl.h"
-#include "zmq.hpp"
+#include "zmq.h"
 //#include "zmsg.hpp"
 #include "time.h"
+#include "configuration.h"
+#include "zhelpers.h"
+
 //=============================================================================
 // Macro Definitions
 //=============================================================================
@@ -50,6 +52,11 @@ struct myThread{
 	unsigned char* arpBuffers[ LADYBUG_NUM_CAMERAS ];
 	boost::thread* thread;
 };
+
+void ladybugThread(void* p_zmqcontext, std::string imageReciever);
+void ladybugSimulator(void* p_zmqcontext );
+void compresseionThread(void* p_zmqcontext, int i);
+void sendingThread(void* p_zmqcontext, std::string rosmaster);
 
 LadybugError initCamera(LadybugContext context);
 void initBuffers(unsigned char** arpBuffers, unsigned int number, unsigned int width, unsigned int height, unsigned int dimensions = 4);

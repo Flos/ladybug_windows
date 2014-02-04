@@ -91,7 +91,7 @@
     <OutDir>..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\local\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\work\zguide\examples\C;C:\local\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -245,18 +245,20 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="ladybug5_windows_client_threads.cpp" />
     <ClCompile Include="protobuf\imageMessage.pb.cc" />
-    <ClCompile Include="socket.cpp" />
+    <ClCompile Include="timing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ladybug5_windows_client.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="configuration.h" />
+    <ClInclude Include="myHelper.h" />
     <ClInclude Include="ladybug5_windows_client.h" />
-    <ClInclude Include="ladybugToString.h" />
+    <ClInclude Include="myHelper.cpp" />
     <ClInclude Include="protobuf\imageMessage.pb.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="socket.h" />
     <ClInclude Include="timing.h" />
   </ItemGroup>
   <ItemGroup>
