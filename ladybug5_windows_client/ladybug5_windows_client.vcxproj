@@ -85,13 +85,14 @@
     <OutDir>bin\</OutDir>
     <IntDir>.\Debug\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\opt\zeromq\include;C:\opt\libjpeg-turbo64\include;C:\opt\boost\boost;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\work\zguide\examples\C;C:\local\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -220,7 +221,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <OutputFile>../bin/$(ProjectName)_$(Platform)_$(Configuration).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -254,9 +255,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.h" />
-    <ClInclude Include="myHelper.h" />
     <ClInclude Include="ladybug5_windows_client.h" />
-    <ClInclude Include="myHelper.cpp" />
     <ClInclude Include="protobuf\imageMessage.pb.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="timing.h" />

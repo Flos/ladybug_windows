@@ -28,7 +28,7 @@
 #include "protobuf/imageMessage.pb.h"
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/io/zero_copy_stream_impl.h"
-#include "zmq.h"
+#include "zmq.hpp"
 //#include "zmsg.hpp"
 #include "time.h"
 #include "configuration.h"
@@ -53,10 +53,10 @@ struct myThread{
 	boost::thread* thread;
 };
 
-void ladybugThread(void* p_zmqcontext, std::string imageReciever);
-void ladybugSimulator(void* p_zmqcontext );
-void compresseionThread(void* p_zmqcontext, int i);
-void sendingThread(void* p_zmqcontext, std::string rosmaster);
+void ladybugThread(zmq::context_t* p_zmqcontext, std::string imageReciever);
+void ladybugSimulator(zmq::context_t* p_zmqcontext );
+void compresseionThread(zmq::context_t* p_zmqcontext, int i);
+void sendingThread(zmq::context_t* p_zmqcontext, std::string rosmaster);
 
 LadybugError initCamera(LadybugContext context);
 void initBuffers(unsigned char** arpBuffers, unsigned int number, unsigned int width, unsigned int height, unsigned int dimensions = 4);
