@@ -1,9 +1,9 @@
 #include "timing.h"
 
-double time_diff(std::string status, double start){
+double time_diff(std::string status, double start, std::string name){
 	double t_now = clock();
 	//printf("%s : %f \n", s, seconds);
-	std::cout << " Time: " << (t_now-start)/CLOCKS_PER_SEC << " : to pass " << status  << std::endl;
+    printf("Time: %f : In %s\t to pass %s\n", (t_now-start)/CLOCKS_PER_SEC,  name.c_str(), status.c_str());
  
 	return t_now;
 }

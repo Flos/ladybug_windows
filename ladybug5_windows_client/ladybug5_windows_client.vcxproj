@@ -246,6 +246,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="ladybug5_windows_client_functions.cpp" />
     <ClCompile Include="ladybug5_windows_client_threads.cpp" />
     <ClCompile Include="protobuf\imageMessage.pb.cc" />
     <ClCompile Include="timing.cpp" />

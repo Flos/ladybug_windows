@@ -2,33 +2,15 @@
 #include "timing.h"
 #include "ladybug5_windows_client.h"
 
-static bool pb_send(zmq::socket_t* socket, const ladybug5_network::pbMessage* pb_message){
-	// serialize the request to a string
-	std::string pb_serialized;
-	pb_message->SerializeToString(&pb_serialized);
-    
-	// create and send the zmq message
-	zmq::message_t request (pb_serialized.size());
-	memcpy ((void *) request.data (), pb_serialized.c_str(), pb_serialized.size());
-	return socket->send(request, 0);
-}
-
-static bool pb_recv(zmq::socket_t* socket, ladybug5_network::pbMessage* pb_message){
-	// serialize the request to a string
-	zmq::message_t zmq_msg;
-	bool result = socket->recv(&zmq_msg);
-	pb_message->ParseFromArray(zmq_msg.data(), zmq_msg.size());
-	return result;
-}
 
 void ladybugThread(zmq::context_t* p_zmqcontext, std::string imageReciever)
 {
-    printf("Start ladybug5_windows_client.exe\nPano w: %i h: %i\n\n", PANORAMIC_IMAGE_WIDTH, 
-		PANORAMIC_IMAGE_HEIGHT);
+    printf("Start ladybug5_windows_client.exe\nPano w: %i h: %i\n\n", cfg_pano_width, 
+        cfg_pano_hight);
 	std::string connection = "inproc://" + imageReciever;
 
 _RESTART:
-	zmq::socket_t socket(*p_zmqcontext, ZMQ_REQ);
+	zmq::socket_t socket(*p_zmqcontext, ZMQ_PUSH);
 	socket.connect("inproc://uncompressed");
 	
 	unsigned char* arpBuffers[ LADYBUG_NUM_CAMERAS ];
@@ -64,7 +46,7 @@ _RESTART:
 	_HANDLE_ERROR
 	_TIME	
 
-	if(PANORAMIC){
+    if(cfg_panoramic){
 		status = "configure for panoramic stitching";
 		error = configureLadybugForPanoramic(context);
 		_HANDLE_ERROR
@@ -134,11 +116,9 @@ _RESTART:
 
 				error = ladybugConvertImage(context, &image, arpBuffers);
 				_HANDLE_ERROR
-			
 
 				for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 				{
-				
 					message.MergeFrom(createMessage("windows","ladybug5"));
 					// send message to queue insted
 					unsigned int image_size = uiRawCols*uiRawRows*4;
@@ -191,7 +171,7 @@ void ladybugSimulator(zmq::context_t* p_zmqcontext ){
 	printf("%s connecting to: %s\n", status.c_str(), connection.c_str());
 	////connection = "inproc://workers_";
 
-	zmq::socket_t socket(*p_zmqcontext, ZMQ_REQ);
+    zmq::socket_t socket(*p_zmqcontext, ZMQ_PUSH);
 	socket.bind(connection.c_str());
 
 	unsigned char* arpBuffers[ LADYBUG_NUM_CAMERAS ];
@@ -222,11 +202,12 @@ void ladybugSimulator(zmq::context_t* p_zmqcontext ){
 
 			for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 			{
+                status = "sending single image";
 				message.set_name("windows");
 				message.set_camera("ladybug5");
 				ladybug5_network::pbImage* image_msg = 0;
 				image_msg = message.add_images();
-				image_msg->set_image(arpBuffers[uiCamera],  size[uiCamera]);
+				//image_msg->set_image(arpBuffers[uiCamera],  size[uiCamera]);
 				image_msg->set_size( size[uiCamera]);
 				image_msg->set_type((ladybug5_network::ImageType) ( 1 << uiCamera));
 				image_msg->set_name(enumToString(image_msg->type()));
@@ -234,32 +215,35 @@ void ladybugSimulator(zmq::context_t* p_zmqcontext ){
 				image_msg->set_width(uiRawRows);
 				image_msg->set_allocated_time(new ladybug5_network::LadybugTimeStamp(msg_timestamp));
 
-				assert(image_msg->image().size()!=0);
-				pb_send(&socket, &message);
+				assert(image_msg->size()!=0);
+                pb_send(&socket, &message,ZMQ_SNDMORE);
+                zmq::message_t image(size[uiCamera]);
+                memcpy(image.data(), arpBuffers[uiCamera], size[uiCamera]);
+                socket.send(image);
 				message.Clear();
-				zmq::message_t ready;
-				socket.recv(&ready);
-				
+				//zmq::message_t ready;
+				//socket.recv(&ready);
+                _TIME
 			}
-			Sleep(50);
+			Sleep(100);
+            status = "loop";
 			_TIME
-
 		}
 }
 
 
 void compresseionThread(zmq::context_t* p_zmqcontext, int i)
-{
-	
+{	
+    std::string status = "CompressionThread";
 	std::string connection_in = "inproc://uncompressed";
 	std::string connection_out = "inproc://pb_message";
+    double t_now = clock();
+	printf("Compression Thread%i: in: %s out: %s\n", i, connection_in.c_str(), connection_out.c_str());
 
-	printf("Compression Thread%i: in: %s out: $s\n", i, connection_in.c_str(), connection_out.c_str());
-
-	zmq::socket_t socket_in(*p_zmqcontext, ZMQ_REP);
+    zmq::socket_t socket_in(*p_zmqcontext, ZMQ_PULL);
 	socket_in.connect(connection_in.c_str());
 
-	zmq::socket_t socket_out(*p_zmqcontext, ZMQ_REQ);
+    zmq::socket_t socket_out(*p_zmqcontext, ZMQ_PUSH);
 	socket_out.connect(connection_out.c_str());
 
 	zmq::message_t zmq_ready;
@@ -268,35 +252,47 @@ void compresseionThread(zmq::context_t* p_zmqcontext, int i)
 	while(true)
 	{
 		pb_recv(&socket_in, &pb_msg); /* Block until a message is available to be received from socket */
-		socket_in.send(zmq_ready); /* send emtpy message, to sign that the other thread can continue*/
+        status = "compresseionThread recieving image";
+        _TIME
+        zmq::message_t arpBuffer;
+        socket_in.recv(&arpBuffer);
+		//socket_in.send(zmq_ready); /* send emtpy message, to sign that the other thread can continue*/
 
-		assert(pb_msg.images(0).image().length()!=0);
-		assert(pb_msg.images(0).image().size()!=0);
-	
-		compressImageInMsg(&pb_msg);
-
+		//assert(pb_msg.images(0).image().length()!=0);
+		//assert(pb_msg.images(0).image().size()!=0);
+	    status = "compresseionThread compress jpg";
+		compressImageToMsg(&pb_msg, &arpBuffer);
+        _TIME
+        status = "compresseionThread serialise and send";
 		pb_send(&socket_out, &pb_msg);
 		pb_msg.Clear();
-		zmq::message_t empty;
-		socket_out.recv(&empty);		
+        _TIME
+		//zmq::message_t empty;
+		//socket_out.recv(&empty);		
 	}
 }
 
-void sendingThread(zmq::context_t* p_zmqcontext, std::string rosmaster){
-	printf("Sending Thread: init connecting to %s\n", rosmaster.c_str());
+void sendingThread(zmq::context_t* p_zmqcontext){
+    std::string status = "Sendin Thread: init";
+    double t_now = clock();	
+				
+    printf("%s connecting to %s\n", status.c_str(), cfg_ros_master.c_str());
 	
 	std::string connection_in = "inproc://pb_message";
-	zmq::socket_t socket_in(*p_zmqcontext, ZMQ_REP);
+	zmq::socket_t socket_in(*p_zmqcontext, ZMQ_PULL);
 	socket_in.bind(connection_in.c_str());
 
 	zmq::socket_t socket_out(*p_zmqcontext, ZMQ_PUB);
-	socket_out.connect(rosmaster.c_str());
+	socket_out.connect(cfg_ros_master.c_str());
+    _TIME
 
-	zmq::message_t done;
 	while(true){
-		zmq::message_t in;
-		socket_in.recv(&in);
-		socket_in.send(done);
-		socket_out.send(in);
+        status = "SendingThread: Recived message";
+		zmq::message_t in1;
+        socket_in.recv(&in1);
+        _TIME
+        status = "SendingThread: Send message";
+        socket_out.send(in1);  
+        _TIME
 	}
 }
