@@ -1,5 +1,5 @@
 #include "timing.h"
-#include "ladybug5_windows_client.h"
+#include "client.h"
 
 void compressImages(ladybug5_network::pbMessage *message, unsigned char* arpBuffers, TJPF TJPF_BGRA, ladybug5_network::LadybugTimeStamp *msg_timestamp, int uiRawCols, int uiRawRows )
 {

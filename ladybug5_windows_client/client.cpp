@@ -1,6 +1,5 @@
-#pragma once
 #include "timing.h"
-#include "ladybug5_windows_client.h"
+#include "client.h"
 
 std::string cfg_ros_master = "tcp://192.168.1.178:28882";
 std::string cfg_configFile = "config.ini";
@@ -56,7 +55,7 @@ void main( int argc, char* argv[] ){
             threads.create_thread(std::bind(ladybugThread, &context, "inproc://uncompressed")); // ladybug thread
         }
 	
-        for(int i=0; i< cfg_compression_threads; ++i){
+        for(unsigned int i=0; i< cfg_compression_threads; ++i){
 		    threads.create_thread(std::bind(compresseionThread, &context, i)); //worker thread (jpg-compression)
 	    }
 

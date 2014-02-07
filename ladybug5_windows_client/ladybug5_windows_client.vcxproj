@@ -242,7 +242,11 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ladybug5_windows_client.cpp">
+    <ClCompile Include="thread_ladybug.cpp" />
+    <ClCompile Include="thread_sending.cpp" />
+    <ClCompile Include="thread_simulator.cpp" />
+    <ClCompile Include="thread_ladybug_single.cpp" />
+    <ClCompile Include="client.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
@@ -254,18 +258,18 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BrowseInformation>
     </ClCompile>
-    <ClCompile Include="ladybug5_windows_client_functions.cpp" />
-    <ClCompile Include="ladybug5_windows_client_helper.cpp" />
-    <ClCompile Include="ladybug5_windows_client_threads.cpp" />
+    <ClCompile Include="functions.cpp" />
+    <ClCompile Include="helper.cpp" />
+    <ClCompile Include="thread_compression.cpp" />
     <ClCompile Include="protobuf\imageMessage.pb.cc" />
     <ClCompile Include="timing.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="ladybug5_windows_client.rc" />
+    <ResourceCompile Include="client.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.h" />
-    <ClInclude Include="ladybug5_windows_client.h" />
+    <ClInclude Include="client.h" />
     <ClInclude Include="protobuf\imageMessage.pb.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="timing.h" />
