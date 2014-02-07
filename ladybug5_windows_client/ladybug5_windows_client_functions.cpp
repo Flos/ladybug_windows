@@ -142,7 +142,7 @@ void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zm
 	std::string status = "Compression";
 	unsigned char* _compressedImage = 0;
 	int JPEG_QUALITY = 85;
-	TJPF color = TJPF_BGR;
+	TJPF color = TJPF_BGRA;
 	
 	int img_width =  message->images(i).width();
 	int img_hight =  message->images(i).hight();
@@ -170,11 +170,6 @@ void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zm
 
 	img_msg->set_image(_compressedImage, img_Size);
 	img_msg->set_size(img_Size);
-	img_msg->set_type(img_type);
-	img_msg->set_name(enumToString(img_msg->type()));
-	img_msg->set_allocated_time(msg_timestamp);
-	img_msg->set_hight(img_hight);
-	img_msg->set_width(img_width);
 
 	tjFree(_compressedImage);
     _TIME
@@ -264,15 +259,17 @@ _EXIT:
 	return error;
 }
 
-void initBuffers(unsigned char** arpBuffers, unsigned int number, unsigned int width, unsigned int height, unsigned int dimensions){
+unsigned int initBuffers(unsigned char** arpBuffers, unsigned int number, unsigned int width, unsigned int height, unsigned int dimensions){
 	//
 	// Initialize the pointers to NULL 
 	//
-	std::cout << "Initialised arpBuffers with size: "<< width * height * dimensions << " width: " << width << " height: " << height << std::endl;
+    unsigned int size = width * height * dimensions;
+	std::cout << "Initialised arpBuffers with size: "<< size << " width: " << width << " height: " << height << std::endl;
 	for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 	{
-		arpBuffers[ uiCamera ] = new unsigned char[ width * height * dimensions ];
+		arpBuffers[ uiCamera ] = new unsigned char[ size ];
 	}
+    return size;
 }
 
 

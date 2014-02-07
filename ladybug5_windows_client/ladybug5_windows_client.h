@@ -80,7 +80,7 @@ void compresseionThread(zmq::context_t* p_zmqcontext, int i);
 void sendingThread(zmq::context_t* p_zmqcontext);
 
 LadybugError initCamera(LadybugContext context);
-void initBuffers(unsigned char** arpBuffers, unsigned int number, unsigned int width, unsigned int height, unsigned int dimensions = 4);
+unsigned int initBuffers(unsigned char** arpBuffers, unsigned int number, unsigned int width, unsigned int height, unsigned int dimensions = 4);
 void initBuffersWitPicture(unsigned char** arpBuffers, long unsigned int* size);
 LadybugError configureLadybugForPanoramic(LadybugContext context);
 LadybugError startLadybug(LadybugContext context);
