@@ -242,6 +242,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="protobuf_helper.cpp" />
     <ClCompile Include="thread_ladybug.cpp" />
     <ClCompile Include="thread_sending.cpp" />
     <ClCompile Include="thread_simulator.cpp" />
@@ -259,7 +260,7 @@
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BrowseInformation>
     </ClCompile>
     <ClCompile Include="functions.cpp" />
-    <ClCompile Include="helper.cpp" />
+    <ClCompile Include="configuration_helper.cpp" />
     <ClCompile Include="thread_compression.cpp" />
     <ClCompile Include="protobuf\imageMessage.pb.cc" />
     <ClCompile Include="timing.cpp" />
@@ -268,7 +269,7 @@
     <ResourceCompile Include="client.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="configuration.h" />
+    <ClInclude Include="configuration_helper.h" />
     <ClInclude Include="client.h" />
     <ClInclude Include="protobuf\imageMessage.pb.h" />
     <ClInclude Include="resource.h" />

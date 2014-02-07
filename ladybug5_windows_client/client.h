@@ -23,25 +23,15 @@
 //=============================================================================
 #include "turbojpeg.h"
 #include <boost/thread.hpp>
-//#include <boost\>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/bimap.hpp>
-#include <boost/bimap/list_of.hpp>
-#include <boost/assign.hpp>
 #include <assert.h>
 #include "protobuf/imageMessage.pb.h"
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "zmq.hpp"
-//#include "zmsg.hpp"
 #include "time.h"
-#include "configuration.h"
+#include "configuration_helper.h"
 #include "zhelpers.h"
 #include <locale.h>
-
-typedef boost::bimap< LadybugDataFormat, std::string > ldf_type;
-typedef boost::bimap< LadybugColorProcessingMethod, std::string > lcpm_type;
 
 //=============================================================================
 // Macro Definitions
@@ -63,12 +53,6 @@ void compresseionThread(zmq::context_t* p_zmqcontext, int i);
 void sendingThread(zmq::context_t* p_zmqcontext);
 int singleThread();
 
-/*Config*/
-void printTree (boost::property_tree::ptree &pt, int level);
-void createDefaultIni(boost::property_tree::ptree *pt);
-void loadConfigsFromPtree(boost::property_tree::ptree *pt);
-extern const ldf_type ladybugDataFormatMap;
-extern const lcpm_type ladybugColorProcessingMap;
 
 /*Ladybug*/
 LadybugError initCamera(LadybugContext context);
