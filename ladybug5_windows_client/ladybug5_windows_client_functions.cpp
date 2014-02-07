@@ -66,7 +66,7 @@ LadybugError configureLadybugForPanoramic(LadybugContext context){
 	}
 
 	// Set color processing method.
-	error = ladybugSetColorProcessingMethod( context, COLOR_PROCESSING_METHOD );
+    error = ladybugSetColorProcessingMethod( context, cfg_ladybug_colorProcessing );
 	if (error != LADYBUG_OK)
 	{
 		return error;    
@@ -114,7 +114,8 @@ LadybugError startLadybug(LadybugContext context){
 			context,
 			//LADYBUG_DATAFORMAT_JPEG8 
 			//LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8
-			LADYBUG_DATAFORMAT_RAW8 
+			//LADYBUG_DATAFORMAT_RAW8 
+            cfg_ladybug_dataformat
 			);
 		break;
 
@@ -135,7 +136,7 @@ ladybug5_network::pbMessage createMessage(std::string name, std::string camera){
 	return message;
 }
 
-void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zmq_msg){
+void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zmq_msg, int i){
 	//encode to jpg
     double t_now = clock();
 	std::string status = "Compression";
@@ -143,10 +144,10 @@ void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zm
 	int JPEG_QUALITY = 85;
 	TJPF color = TJPF_BGR;
 	
-	int img_width =  message->images(0).width();
-	int img_hight =  message->images(0).hight();
+	int img_width =  message->images(i).width();
+	int img_hight =  message->images(i).hight();
 	unsigned long img_Size = 0;
-	ladybug5_network::ImageType img_type = message->images(0).type();
+	ladybug5_network::ImageType img_type = message->images(i).type();
 
 	unsigned char* pointer = (unsigned char*)zmq_msg->data();
 	assert(zmq_msg->size()!=0);
@@ -161,11 +162,12 @@ void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zm
     status = "updating image message";
 	assert(img_Size!=0);
 
-	ladybug5_network::LadybugTimeStamp* msg_timestamp = new ladybug5_network::LadybugTimeStamp(message->images(0).time());
+	ladybug5_network::LadybugTimeStamp* msg_timestamp = new ladybug5_network::LadybugTimeStamp(message->images(i).time());
 	//append to message
-	message->clear_images();
-	ladybug5_network::pbImage* img_msg = 0;
-	img_msg = message->add_images();
+
+	//message->clear_images();
+	ladybug5_network::pbImage* img_msg =(ladybug5_network::pbImage*) &message->images(i);
+
 	img_msg->set_image(_compressedImage, img_Size);
 	img_msg->set_size(img_Size);
 	img_msg->set_type(img_type);
@@ -176,46 +178,6 @@ void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zm
 
 	tjFree(_compressedImage);
     _TIME
-}
-
-void compressImageInMsg(ladybug5_network::pbMessage *message){
-	//encode to jpg
-	
-	unsigned char* _compressedImage = 0;
-	int JPEG_QUALITY = 85;
-	TJPF color = TJPF_BGR;
-	
-	int img_width =  message->images(0).width();
-	int img_hight =  message->images(0).hight();
-	unsigned long img_Size = 0;
-	ladybug5_network::ImageType img_type = message->images(0).type();
-
-	unsigned char* pointer = (unsigned char*)message->mutable_images(0)->image().data();
-	assert(message->images(0).image().size()!=0);
-	assert(img_width!=0);
-	assert(img_hight!=0);
-	tjhandle _jpegCompressor = tjInitCompress();
-	tjCompress2(_jpegCompressor, pointer, img_width, 0, img_hight, color,
-				&_compressedImage, &img_Size, TJSAMP_420, JPEG_QUALITY,
-				TJFLAG_FASTDCT);
-	tjDestroy(_jpegCompressor);
-
-	assert(img_Size!=0);
-
-	ladybug5_network::LadybugTimeStamp* msg_timestamp = new ladybug5_network::LadybugTimeStamp(message->images(0).time());
-	//append to message
-	message->clear_images();
-	ladybug5_network::pbImage* img_msg = 0;
-	img_msg = message->add_images();
-	img_msg->set_image(_compressedImage, img_Size);
-	img_msg->set_size(img_Size);
-	img_msg->set_type(img_type);
-	img_msg->set_name(enumToString(img_msg->type()));
-	img_msg->set_allocated_time(msg_timestamp);
-	img_msg->set_hight(img_hight);
-	img_msg->set_width(img_width);
-	
-	tjFree(_compressedImage);
 }
 
 void addImageToMessage(ladybug5_network::pbMessage *message,  unsigned char* uncompressedBGRImageBuffer, TJPF color, ladybug5_network::LadybugTimeStamp *timestamp, ladybug5_network::ImageType img_type, int _width, int _height){

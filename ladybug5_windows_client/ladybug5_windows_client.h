@@ -22,10 +22,13 @@
 // Other Includes
 //=============================================================================
 #include "turbojpeg.h"
-#include <boost\thread.hpp>
-#include <boost\circular_buffer.hpp>
+#include <boost/thread.hpp>
+//#include <boost\>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+#include <boost/bimap.hpp>
+#include <boost/bimap/list_of.hpp>
+#include <boost/assign.hpp>
 #include <assert.h>
 #include "protobuf/imageMessage.pb.h"
 #include "google/protobuf/io/coded_stream.h"
@@ -35,6 +38,9 @@
 #include "time.h"
 #include "configuration.h"
 #include "zhelpers.h"
+#include <locale.h>
+
+
 
 //=============================================================================
 // Macro Definitions
@@ -80,7 +86,6 @@ LadybugError configureLadybugForPanoramic(LadybugContext context);
 LadybugError startLadybug(LadybugContext context);
 ladybug5_network::pbMessage createMessage(std::string name, std::string camera);
 int singleThread();
-void compressImageInMsg(ladybug5_network::pbMessage *message);
-void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zmq_msg);
+void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zmq_msg, int i);
 void addImageToMessage(ladybug5_network::pbMessage *message,  unsigned char* uncompressedBGRImageBuffer, TJPF color, ladybug5_network::LadybugTimeStamp *timestamp, ladybug5_network::ImageType img_type, int _width, int _height);
 void jpegEncode(unsigned char* _compressedImage, unsigned long *_jpegSize, unsigned char* srcBuffer, int JPEG_QUALITY, int _width, int _height );

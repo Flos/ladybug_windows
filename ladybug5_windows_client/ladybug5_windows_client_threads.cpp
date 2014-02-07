@@ -72,11 +72,10 @@ _RESTART:
 	_HANDLE_ERROR
 	_TIME
 
-
 	status = "inspect image size";
 	// Set the size of the image to be processed
-	if (COLOR_PROCESSING_METHOD == LADYBUG_DOWNSAMPLE4 || 
-		COLOR_PROCESSING_METHOD == LADYBUG_MONO)
+	if (cfg_ladybug_colorProcessing == LADYBUG_DOWNSAMPLE4 || 
+		cfg_ladybug_colorProcessing == LADYBUG_MONO)
 	{
 		uiRawCols = image.uiCols / 2;
 		uiRawRows = image.uiRows / 2;
@@ -95,6 +94,7 @@ _RESTART:
 	_HANDLE_ERROR
 	_TIME
 	{
+        unsigned int image_size = uiRawCols*uiRawRows*4;
 		initBuffers(arpBuffers, LADYBUG_NUM_CAMERAS, uiRawCols, uiRawRows, 4);
 		ladybug5_network::LadybugTimeStamp msg_timestamp;
 		ladybug5_network::pbMessage message;
@@ -120,8 +120,7 @@ _RESTART:
 				for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 				{
 					message.MergeFrom(createMessage("windows","ladybug5"));
-					// send message to queue insted
-					unsigned int image_size = uiRawCols*uiRawRows*4;
+					
 					ladybug5_network::pbImage* image_msg = 0;
 					image_msg = message.add_images();
 					image_msg->set_image(arpBuffers[uiCamera], image_size);
@@ -132,10 +131,15 @@ _RESTART:
 					image_msg->set_hight(uiRawCols);
 					image_msg->set_width(uiRawRows);
 
-					pb_send(&socket, &message);
-					message.Clear();
-				
-					//std::cout << "send message with size: " << message.ByteSize() << std::endl;
+					zmq::message_t image(image_size);
+                    memcpy(image.data(), arpBuffers[uiCamera], image_size);
+                    if( !cfg_full_img_msg || uiCamera == LADYBUG_NUM_CAMERAS-1 ){
+                        socket.send(image, ZMQ_SNDMORE);
+                        pb_send(&socket, &message, 0);
+                        message.Clear();
+                    }else{
+                        socket.send(image, ZMQ_SNDMORE);
+                    }
 				}
 				_TIME
 			}
@@ -188,11 +192,13 @@ void ladybugSimulator(zmq::context_t* p_zmqcontext ){
 	initBuffersWitPicture(arpBuffers, size);
 	ladybug5_network::LadybugTimeStamp msg_timestamp;
 	ladybug5_network::pbMessage message;
+    
 	while(true)
 	{
-			status = "Grabbing loop...";
+			status = "simulator loop sending";
 			double loopstart = t_now = clock();	
-			double t_now = loopstart;	
+			double t_now = loopstart;
+            int flag = 1;
 			
 			msg_timestamp.set_ulcyclecount(4);
 			msg_timestamp.set_ulcycleoffset(2);
@@ -202,7 +208,6 @@ void ladybugSimulator(zmq::context_t* p_zmqcontext ){
 
 			for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 			{
-                status = "sending single image";
 				message.set_name("windows");
 				message.set_camera("ladybug5");
 				ladybug5_network::pbImage* image_msg = 0;
@@ -216,17 +221,20 @@ void ladybugSimulator(zmq::context_t* p_zmqcontext ){
 				image_msg->set_allocated_time(new ladybug5_network::LadybugTimeStamp(msg_timestamp));
 
 				assert(image_msg->size()!=0);
-                pb_send(&socket, &message,ZMQ_SNDMORE);
+                
                 zmq::message_t image(size[uiCamera]);
                 memcpy(image.data(), arpBuffers[uiCamera], size[uiCamera]);
-                socket.send(image);
-				message.Clear();
-				//zmq::message_t ready;
-				//socket.recv(&ready);
-                _TIME
+                if( !cfg_full_img_msg || uiCamera == LADYBUG_NUM_CAMERAS-1 ){
+                    socket.send(image, ZMQ_SNDMORE);
+                    pb_send(&socket, &message, 0);
+                    message.Clear();
+                }else{
+                    socket.send(image, ZMQ_SNDMORE);
+                }
 			}
+            _TIME
 			Sleep(100);
-            status = "loop";
+            status = "simulator pause";
 			_TIME
 		}
 }
@@ -243,25 +251,44 @@ void compresseionThread(zmq::context_t* p_zmqcontext, int i)
     zmq::socket_t socket_in(*p_zmqcontext, ZMQ_PULL);
 	socket_in.connect(connection_in.c_str());
 
-    zmq::socket_t socket_out(*p_zmqcontext, ZMQ_PUSH);
-	socket_out.connect(connection_out.c_str());
+    zmq::socket_t socket_out(*p_zmqcontext, ZMQ_PUB);
+    socket_out.connect(cfg_ros_master.c_str());
 
 	zmq::message_t zmq_ready;
 	ladybug5_network::pbMessage pb_msg;
 
 	while(true)
 	{
-		pb_recv(&socket_in, &pb_msg); /* Block until a message is available to be received from socket */
-        status = "compresseionThread recieving image";
-        _TIME
-        zmq::message_t arpBuffer;
-        socket_in.recv(&arpBuffer);
+		status = "compresseionThread recieving image";
+        zmq::message_t arpBuffer[LADYBUG_NUM_CAMERAS];
+        int numImages = 0;
+
+        int more;
+        size_t more_size = sizeof (more);
+        
+        do{
+            socket_in.recv(&arpBuffer[numImages]);
+            socket_in.getsockopt(ZMQ_RCVMORE, &more, &more_size);
+             ++numImages;
+            printf("compression recieved image: %i more: %i\n", numImages, more, more_size);
+            if(more && (numImages == LADYBUG_NUM_CAMERAS || !cfg_full_img_msg)){
+                pb_recv(&socket_in, &pb_msg);
+                socket_in.getsockopt(ZMQ_RCVMORE, &more, &more_size);
+                printf("compression recieved pb message: %i more: %i\n", numImages, more, more_size);
+            }
+        }
+        while(more);
+         _TIME
+
 		//socket_in.send(zmq_ready); /* send emtpy message, to sign that the other thread can continue*/
 
 		//assert(pb_msg.images(0).image().length()!=0);
 		//assert(pb_msg.images(0).image().size()!=0);
 	    status = "compresseionThread compress jpg";
-		compressImageToMsg(&pb_msg, &arpBuffer);
+        for(int i=0 ; i < numImages; ++i){
+            compressImageToMsg(&pb_msg, &arpBuffer[i], i);
+        }
+		
         _TIME
         status = "compresseionThread serialise and send";
 		pb_send(&socket_out, &pb_msg);

@@ -2,6 +2,20 @@
 #include "timing.h"
 #include "ladybug5_windows_client.h"
 
+std::string cfg_ros_master = "tcp://192.168.1.178:28882";
+std::string cfg_configFile = "config.ini";
+bool cfg_threading = true;
+bool cfg_panoramic = false;
+bool cfg_simulation = true;
+bool cfg_postprocessing = false;
+bool cfg_full_img_msg = true;
+unsigned int cfg_compression_threads = 4; 
+/* The size of the stitched image */
+unsigned int cfg_pano_width = 4096;
+unsigned int cfg_pano_hight = 2048;
+LadybugDataFormat cfg_ladybug_dataformat = LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW8;
+LadybugColorProcessingMethod cfg_ladybug_colorProcessing = LADYBUG_DOWNSAMPLE4;
+
 std::string indent(int level) {
   std::string s; 
   for (int i=0; i<level; i++) s += "  ";
@@ -10,52 +24,91 @@ std::string indent(int level) {
 
 void printTree (boost::property_tree::ptree &pt, int level) {
   if (pt.empty()) {
-    std::cerr << "\""<< pt.data()<< "\"";
+    std::cout << "\""<< pt.data()<< "\"";
   } else {
-    if (level) std::cerr << std::endl; 
-    std::cerr << indent(level) << "{" << std::endl;     
+    if (level) std::cout << std::endl; 
+    std::cout << indent(level) << "{" << std::endl;     
     for (boost::property_tree::ptree::iterator pos = pt.begin(); pos != pt.end();) {
-      std::cerr << indent(level+1) << "\"" << pos->first << "\": "; 
+      std::cout << indent(level+1) << "\"" << pos->first << "\": "; 
       printTree(pos->second, level + 1); 
       ++pos; 
       if (pos != pt.end()) {
-        std::cerr << ","; 
+        std::cout << ","; 
       }
-      std::cerr << std::endl;
+      std::cout << std::endl;
     } 
-    std::cerr << indent(level) << " }";     
+    std::cout << indent(level) << " }";     
   }
   return; 
 }
 
+typedef boost::bimap< LadybugDataFormat, std::string > ldf_type;
+const ldf_type ladybugDataFormatMap =
+  boost::assign::list_of< ldf_type::relation >
+    ( LADYBUG_DATAFORMAT_RAW8, "RAW8" )
+    ( LADYBUG_DATAFORMAT_JPEG8, "JPEG8" )
+    ( LADYBUG_DATAFORMAT_COLOR_SEP_RAW8, "COLOR_SEP_RAW8" )
+    ( LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8, "RAW8" )
+    ( LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW8, "HALF_HEIGHT_RAW8" )
+    ( LADYBUG_DATAFORMAT_COLOR_SEP_RAW8, "COLOR_SEP_RAW8" )
+    ( LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG8, "COLOR_SEP_HALF_HEIGHT_JPEG8" )
+    ( LADYBUG_DATAFORMAT_COLOR_SEP_JPEG12, "COLOR_SEP_JPEG12" )
+    ( LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW16, "HALF_HEIGHT_RAW16" )
+    ( LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG12, "COLOR_SEP_HALF_HEIGHT_JPEG12" )
+    ( LADYBUG_DATAFORMAT_RAW12, "RAW12" )
+    ( LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW12, "HALF_HEIGHT_RAW12" );
+//
+//typedef boost::bimap< LadybugColorProcessingMethod, std::string > lcpm_type;
+//const lcpm_type ladybugColorProcessingMap =
+//    boost::assign::list_of< lcpm_type::relation >
+//    ( LADYBUG_DISABLE, "DISABLE" )
+//    ( LADYBUG_EDGE_SENSING, "EDGE_SENSING" )
+//    ( LADYBUG_NEAREST_NEIGHBOR_FAST, "NEAREST_NEIGHBOR_FAST" )
+//    ( LADYBUG_RIGOROUS, "RIGOROUS" )
+//    ( LADYBUG_DOWNSAMPLE4, "DOWNSAMPLE4" )
+//    ( LADYBUG_DOWNSAMPLE16, "DOWNSAMPLE16" )
+//    ( LADYBUG_MONO, "MONO" )
+//    ( LADYBUG_HQLINEAR, "HQLINEAR" )
+//    ( LADYBUG_HQLINEAR_GPU, "HQLINEAR_GPU" )
+//    ( LADYBUG_DIRECTIONAL_FILTER, "DIRECTIONAL_FILTER" )
+//    ( LADYBUG_COLOR_FORCE_QUADLET, "COLOR_FORCE_QUADLET" )
+//    ( LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW12, "DATAFORMAT_HALF_HEIGHT_RAW12" );
+
 void createDefaultIni(boost::property_tree::ptree *pt){
-    pt->put("Settings.ROS_MASTER", cfg_ros_master.c_str());  
-    pt->put("Settings.Threading", cfg_threading);  
-    pt->put("Settings.SimulateLadybug", cfg_simulation);  
-    pt->put("Settings.PostProcessing", cfg_postprocessing);  
-    pt->put("Settings.CompressionThreads", cfg_compression_threads); 
-    pt->put("Settings.Panoramic", cfg_panoramic);  
-    pt->put("Settings.PanoWidth", cfg_pano_width);
-    pt->put("Settings.PanoHight", cfg_pano_hight);
+    pt->put("Network.ROS_MASTER", cfg_ros_master.c_str());  
+    pt->put("Threading.Enabled", cfg_threading);
+    pt->put("Threading.NumberCompressionThreads", cfg_compression_threads); 
+    pt->put("Threading.OneThreadPerImageGrab", cfg_full_img_msg);
+    pt->put("Settings.PostProcessing", cfg_postprocessing);      
+    pt->put("Ladybug.Simulate", cfg_simulation);
+    pt->put("Ladybug.Panoramic_Only", cfg_panoramic);  
+    pt->put("Ladybug.PanoWidth", cfg_pano_width);
+    pt->put("Ladybug.PanoHight", cfg_pano_hight);
+  //  pt->put("Ladybug.ColorProcessing", ladybugColorProcessingMap.left.find(cfg_ladybug_colorProcessing)->second.c_str());
+    pt->put("Ladybug.Dataformat", ladybugDataFormatMap.left.find(cfg_ladybug_dataformat)->second.c_str());
     boost::property_tree::ini_parser::write_ini(cfg_configFile.c_str(), *pt);
 }
 
 void loadConfigsFromPtree(boost::property_tree::ptree *pt){
-    cfg_ros_master = pt->get<std::string>("Settings.ROS_MASTER");
-    cfg_threading = pt->get<bool>("Settings.Threading");
-    cfg_simulation = pt->get<bool>("Settings.SimulateLadybug");
+    cfg_ros_master = pt->get<std::string>("Network.ROS_MASTER");
+    cfg_threading = pt->get<bool>("Threading.Enabled");
+    cfg_compression_threads = pt->get<unsigned int>("Threading.NumberCompressionThreads");
+    cfg_full_img_msg = pt->get<bool>("Threading.OneThreadPerImageGrab");
     cfg_postprocessing = pt->get<bool>("Settings.PostProcessing");
-    cfg_panoramic = pt->get<bool>("Settings.Panoramic");
-    cfg_pano_width = pt->get<int>("Settings.PanoWidth");
-    cfg_pano_hight = pt->get<unsigned int>("Settings.PanoHight");
-    cfg_compression_threads = pt->get<unsigned int>("Settings.CompressionThreads");
+    cfg_simulation = pt->get<bool>("Ladybug.Simulate");
+    cfg_panoramic = pt->get<bool>("Ladybug.Panoramic_Only");
+    cfg_pano_width = pt->get<int>("Ladybug.PanoWidth");
+    cfg_pano_hight = pt->get<unsigned int>("Ladybug.PanoHight");
+  //  cfg_ladybug_colorProcessing = ladybugColorProcessingMap.right.find( pt->get<std::string>("Ladybug.ColorProcessing"))->second;    
+    cfg_ladybug_dataformat = ladybugDataFormatMap.right.find( pt->get<std::string>("Ladybug.Dataformat"))->second;
 }
 
 void main( int argc, char* argv[] ){
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     printf("Start ladybug5_windows_client\n");
+    setlocale(LC_ALL, ".OCP");
+
     boost::property_tree::ptree pt;
-    
     try{
         boost::property_tree::ini_parser::read_ini(cfg_configFile.c_str(), pt);
         loadConfigsFromPtree(&pt);
@@ -65,7 +118,7 @@ void main( int argc, char* argv[] ){
         createDefaultIni(&pt);
         loadConfigsFromPtree(&pt);
     }
-   
+   printf("Send-%i\n", cfg_full_img_msg);
     printTree(pt, 0);
     printf("\n");
 
@@ -107,9 +160,9 @@ void main( int argc, char* argv[] ){
 
 	    boost::thread_group threads;
 	    threads.create_thread(std::bind(ladybugSimulator, &context)); //ladybug grabbing thread
-	    threads.create_thread(std::bind(sendingThread, &context)); // sending thread
+	    //threads.create_thread(std::bind(sendingThread, &context)); // sending thread
 	
-	    for(int i=0; i< 4; ++i){
+        for(int i=0; i< cfg_compression_threads; ++i){
 		    threads.create_thread(std::bind(compresseionThread, &context, i)); //worker thread (jpg-compression)
 	    }
 	
@@ -198,8 +251,8 @@ _RESTART:
 
 	status = "inspect image size";
 	// Set the size of the image to be processed
-	if (COLOR_PROCESSING_METHOD == LADYBUG_DOWNSAMPLE4 || 
-		COLOR_PROCESSING_METHOD == LADYBUG_MONO)
+    if (cfg_ladybug_colorProcessing == LADYBUG_DOWNSAMPLE4 || 
+		cfg_ladybug_colorProcessing == LADYBUG_MONO)
 	{
 		uiRawCols = image.uiCols / 2;
 		uiRawRows = image.uiRows / 2;
