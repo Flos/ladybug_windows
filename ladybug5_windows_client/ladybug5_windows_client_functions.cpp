@@ -128,21 +128,27 @@ LadybugError startLadybug(LadybugContext context){
 	return error;
 }
 
-ladybug5_network::pbMessage createMessage(std::string name, std::string camera){
-	ladybug5_network::pbMessage message;
-	message.set_id(1);
-	message.set_name(name);
-	message.set_camera(camera);
-	return message;
+void ladybugImagetoDisk(LadybugImage *image, std::string filename){
+    image->stippledFormat;
+    image->dataFormat;
+    image->uiDataSizeBytes;
+    image->bStippled;
+    size_t size = sizeof(image);
+    std::ofstream myfile(filename.c_str() , std::ios::out | std::ios::app | std::ios::binary);	
+    if (myfile.is_open()) {
+
+    }
+    
+    //LadybugRead
+
 }
 
-void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zmq_msg, int i){
+void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zmq_msg, int i, TJPF color){
 	//encode to jpg
     double t_now = clock();
 	std::string status = "Compression";
 	unsigned char* _compressedImage = 0;
 	int JPEG_QUALITY = 85;
-	TJPF color = TJPF_BGRA;
 	
 	int img_width =  message->images(i).width();
 	int img_hight =  message->images(i).hight();
@@ -294,4 +300,23 @@ void initBuffersWitPicture(unsigned char** arpBuffers, long unsigned int* size){
 			std::cout << "Cant open file " << filename << std::endl;
 		}
 	}
+}
+
+bool pb_send(zmq::socket_t* socket, const ladybug5_network::pbMessage* pb_message, int flag){
+	// serialize the request to a string
+	std::string pb_serialized;
+	pb_message->SerializeToString(&pb_serialized);
+    
+	// create and send the zmq message
+	zmq::message_t request (pb_serialized.size());
+	memcpy ((void *) request.data (), pb_serialized.c_str(), pb_serialized.size());
+	return socket->send(request, flag);
+}
+
+bool pb_recv(zmq::socket_t* socket, ladybug5_network::pbMessage* pb_message){
+	
+	zmq::message_t zmq_msg;
+	bool result = socket->recv(&zmq_msg);
+	pb_message->ParseFromArray(zmq_msg.data(), zmq_msg.size());
+	return result;
 }

@@ -427,7 +427,9 @@ _RESTART:
 		try{
 			double loopstart = t_now = clock();	
 			double t_now = loopstart;	
-			ladybug5_network::pbMessage message = createMessage("windows","ladybug5");
+			ladybug5_network::pbMessage message;
+            message.set_name("windows");
+			message.set_camera("ladybug5");
 
 			printf("\nGrab Image loop...\n");
 			// Grab an image from the camera

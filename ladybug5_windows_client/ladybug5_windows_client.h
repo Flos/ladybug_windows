@@ -40,7 +40,8 @@
 #include "zhelpers.h"
 #include <locale.h>
 
-
+typedef boost::bimap< LadybugDataFormat, std::string > ldf_type;
+typedef boost::bimap< LadybugColorProcessingMethod, std::string > lcpm_type;
 
 //=============================================================================
 // Macro Definitions
@@ -55,37 +56,34 @@
 	goto _EXIT; \
 	}	
 
-static bool pb_send(zmq::socket_t* socket, const ladybug5_network::pbMessage* pb_message, int flag = 0){
-	// serialize the request to a string
-	std::string pb_serialized;
-	pb_message->SerializeToString(&pb_serialized);
-    
-	// create and send the zmq message
-	zmq::message_t request (pb_serialized.size());
-	memcpy ((void *) request.data (), pb_serialized.c_str(), pb_serialized.size());
-	return socket->send(request, flag);
-}
-
-static bool pb_recv(zmq::socket_t* socket, ladybug5_network::pbMessage* pb_message){
-	// serialize the request to a string
-	zmq::message_t zmq_msg;
-	bool result = socket->recv(&zmq_msg);
-	pb_message->ParseFromArray(zmq_msg.data(), zmq_msg.size());
-	return result;
-}
-
+/*Threads*/
 void ladybugThread(zmq::context_t* p_zmqcontext, std::string imageReciever);
 void ladybugSimulator(zmq::context_t* p_zmqcontext );
 void compresseionThread(zmq::context_t* p_zmqcontext, int i);
 void sendingThread(zmq::context_t* p_zmqcontext);
+int singleThread();
 
+/*Config*/
+void printTree (boost::property_tree::ptree &pt, int level);
+void createDefaultIni(boost::property_tree::ptree *pt);
+void loadConfigsFromPtree(boost::property_tree::ptree *pt);
+extern const ldf_type ladybugDataFormatMap;
+extern const lcpm_type ladybugColorProcessingMap;
+
+/*Ladybug*/
 LadybugError initCamera(LadybugContext context);
+LadybugError startLadybug(LadybugContext context);
+LadybugError configureLadybugForPanoramic(LadybugContext context);
+
+/*Protobuff*/
+/* Serialize the ladybug5_network::pbMessage object and send it over the socket */
+bool pb_send(zmq::socket_t* socket, const ladybug5_network::pbMessage* pb_message, int flag = 0);
+/* Recieve and deserialize the request to a ladybug5_network::pbMessage object*/
+bool pb_recv(zmq::socket_t* socket, ladybug5_network::pbMessage* pb_message);
+
+/*Helper*/
 unsigned int initBuffers(unsigned char** arpBuffers, unsigned int number, unsigned int width, unsigned int height, unsigned int dimensions = 4);
 void initBuffersWitPicture(unsigned char** arpBuffers, long unsigned int* size);
-LadybugError configureLadybugForPanoramic(LadybugContext context);
-LadybugError startLadybug(LadybugContext context);
-ladybug5_network::pbMessage createMessage(std::string name, std::string camera);
-int singleThread();
-void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zmq_msg, int i);
+void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zmq_msg, int i, TJPF color = TJPF_BGRA);
 void addImageToMessage(ladybug5_network::pbMessage *message,  unsigned char* uncompressedBGRImageBuffer, TJPF color, ladybug5_network::LadybugTimeStamp *timestamp, ladybug5_network::ImageType img_type, int _width, int _height);
 void jpegEncode(unsigned char* _compressedImage, unsigned long *_jpegSize, unsigned char* srcBuffer, int JPEG_QUALITY, int _width, int _height );
