@@ -35,6 +35,21 @@ extern LadybugColorProcessingMethod cfg_ladybug_colorProcessing;
 extern LadybugAutoShutterRange cfg_ladybug_autoShutterRange;
 extern LadybugAutoExposureMode cfg_ladybug_autoExposureMode;
 
+/* Settings paths */
+extern const char* PATH_ROS_MASTER;
+extern const char* PATH_THREADING;
+extern const char* PATH_NR_THREADS; 
+extern const char* PATH_BATCH_THREAD;
+extern const char* PATH_POST_PROCESS;      
+extern const char* PATH_LADYBUG;
+extern const char* PATH_PANO;  
+extern const char* PATH_PANO_WIDTH;
+extern const char* PATH_PANO_HIGHT;
+extern const char* PATH_COLOR_PROCESSING;
+extern const char* PATH_LB_DATA;
+extern const char* PATH_EXPOSURE;
+extern const char* PATH_SHUTTER;
+
 /* typedefs for enum to string */
 typedef boost::bimap< LadybugDataFormat, std::string > ldf_type;
 typedef boost::bimap< LadybugColorProcessingMethod, std::string > lcpm_type;
@@ -46,6 +61,7 @@ typedef boost::bimap< LadybugAutoExposureMode, std::string > lex_type;
 void printTree (boost::property_tree::ptree &pt, int level);
 void createDefaultIni(boost::property_tree::ptree *pt);
 void loadConfigsFromPtree(boost::property_tree::ptree *pt);
+void createOptionsFile();
 extern const ldf_type ladybugDataFormatMap;
 extern const lcpm_type ladybugColorProcessingMap;
 extern const lsr_type ladybugAutoShutterRangeMap;

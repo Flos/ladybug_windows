@@ -1,5 +1,36 @@
 #include "configuration_helper.h"
 
+/* Settings paths */
+const char* PATH_ROS_MASTER =  "Network.ROS_MASTER";
+const char* PATH_THREADING  =  "Threading.Enabled";
+const char* PATH_NR_THREADS =  "Threading.NumberCompressionThreads"; 
+const char* PATH_BATCH_THREAD ="Threading.OneThreadPerImageGrab";
+const char* PATH_POST_PROCESS=  "Settings.PostProcessing";      
+const char* PATH_LADYBUG    =   "Ladybug.Simulate";
+const char* PATH_PANO       =   "Ladybug.Panoramic_Only";  
+const char* PATH_PANO_WIDTH =   "Ladybug.PanoWidth";
+const char* PATH_PANO_HIGHT =   "Ladybug.PanoHight";
+const char* PATH_COLOR_PROCESSING = "Ladybug.ColorProcessing";
+const char* PATH_LB_DATA    =   "Ladybug.Dataformat";
+const char* PATH_EXPOSURE   =   "Ladybug.ExposureMode";
+const char* PATH_SHUTTER    =   "Ladybug.ShutterRange";
+
+std::string cfg_ros_master = "tcp://10.1.1.1:28882";
+std::string cfg_configFile = "config.ini";
+bool cfg_threading = true;
+bool cfg_panoramic = false;
+bool cfg_simulation = false;
+bool cfg_postprocessing = false;
+bool cfg_full_img_msg = true;
+unsigned int cfg_compression_threads = 4; 
+/* The size of the stitched image */
+unsigned int cfg_pano_width = 4096;
+unsigned int cfg_pano_hight = 2048;
+LadybugDataFormat cfg_ladybug_dataformat = LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW8;
+LadybugColorProcessingMethod cfg_ladybug_colorProcessing = LADYBUG_DOWNSAMPLE4;//LADYBUG_NEAREST_NEIGHBOR_FAST; //LADYBUG_DOWNSAMPLE4;
+LadybugAutoShutterRange cfg_ladybug_autoShutterRange = LADYBUG_AUTO_SHUTTER_MOTION;
+LadybugAutoExposureMode cfg_ladybug_autoExposureMode = LADYBUG_AUTO_EXPOSURE_ROI_FULL_IMAGE ;
+
 std::string indent(int level) {
   std::string s; 
   for (int i=0; i<level; i++) s += "  ";
@@ -22,41 +53,41 @@ void printTree (boost::property_tree::ptree &pt, int level) {
       std::cout << std::endl;
     } 
     std::cout << indent(level) << " }";     
-  }
+  } 
   return; 
 }
 
 void createDefaultIni(boost::property_tree::ptree *pt){
-    pt->put("Network.ROS_MASTER", cfg_ros_master.c_str());  
-    pt->put("Threading.Enabled", cfg_threading);
-    pt->put("Threading.NumberCompressionThreads", cfg_compression_threads); 
-    pt->put("Threading.OneThreadPerImageGrab", cfg_full_img_msg);
-    pt->put("Settings.PostProcessing", cfg_postprocessing);      
-    pt->put("Ladybug.Simulate", cfg_simulation);
-    pt->put("Ladybug.Panoramic_Only", cfg_panoramic);  
-    pt->put("Ladybug.PanoWidth", cfg_pano_width);
-    pt->put("Ladybug.PanoHight", cfg_pano_hight);
-    pt->put("Ladybug.ColorProcessing", ladybugColorProcessingMap.left.find(cfg_ladybug_colorProcessing)->second.c_str());
-    pt->put("Ladybug.Dataformat", ladybugDataFormatMap.left.find(cfg_ladybug_dataformat)->second.c_str());
-    pt->put("Ladybug.ExposureMode", ladybugAutoExposureModeMap.left.find(cfg_ladybug_autoExposureMode)->second.c_str());
-    pt->put("Ladybug.ShutterRange", ladybugAutoShutterRangeMap.left.find(cfg_ladybug_autoShutterRange)->second.c_str());
+    pt->put(PATH_ROS_MASTER, cfg_ros_master.c_str());  
+    pt->put(PATH_THREADING, cfg_threading);
+    pt->put(PATH_NR_THREADS, cfg_compression_threads); 
+    pt->put(PATH_BATCH_THREAD, cfg_full_img_msg);
+    pt->put(PATH_POST_PROCESS, cfg_postprocessing);      
+    pt->put(PATH_LADYBUG, cfg_simulation);
+    pt->put(PATH_PANO, cfg_panoramic);  
+    pt->put(PATH_PANO_WIDTH, cfg_pano_width);
+    pt->put(PATH_PANO_HIGHT, cfg_pano_hight);
+    pt->put(PATH_COLOR_PROCESSING, ladybugColorProcessingMap.left.find(cfg_ladybug_colorProcessing)->second.c_str());
+    pt->put(PATH_LB_DATA, ladybugDataFormatMap.left.find(cfg_ladybug_dataformat)->second.c_str());
+    pt->put(PATH_EXPOSURE, ladybugAutoExposureModeMap.left.find(cfg_ladybug_autoExposureMode)->second.c_str());
+    pt->put(PATH_SHUTTER, ladybugAutoShutterRangeMap.left.find(cfg_ladybug_autoShutterRange)->second.c_str());
     boost::property_tree::ini_parser::write_ini(cfg_configFile.c_str(), *pt);
 }
 
 void loadConfigsFromPtree(boost::property_tree::ptree *pt){
-    cfg_ros_master = pt->get<std::string>("Network.ROS_MASTER");
-    cfg_threading = pt->get<bool>("Threading.Enabled");
-    cfg_compression_threads = pt->get<unsigned int>("Threading.NumberCompressionThreads");
-    cfg_full_img_msg = pt->get<bool>("Threading.OneThreadPerImageGrab");
-    cfg_postprocessing = pt->get<bool>("Settings.PostProcessing");
-    cfg_simulation = pt->get<bool>("Ladybug.Simulate");
-    cfg_panoramic = pt->get<bool>("Ladybug.Panoramic_Only");
-    cfg_pano_width = pt->get<int>("Ladybug.PanoWidth");
-    cfg_pano_hight = pt->get<unsigned int>("Ladybug.PanoHight");
-    cfg_ladybug_colorProcessing = ladybugColorProcessingMap.right.find( pt->get<std::string>("Ladybug.ColorProcessing"))->second;    
-    cfg_ladybug_dataformat = ladybugDataFormatMap.right.find( pt->get<std::string>("Ladybug.Dataformat"))->second;
-    cfg_ladybug_autoExposureMode = ladybugAutoExposureModeMap.right.find( pt->get<std::string>("Ladybug.ExposureMode"))->second;
-    cfg_ladybug_autoShutterRange = ladybugAutoShutterRangeMap.right.find( pt->get<std::string>("Ladybug.ShutterRange"))->second;
+    cfg_ros_master = pt->get<std::string>(PATH_ROS_MASTER);
+    cfg_threading = pt->get<bool>(PATH_THREADING);
+    cfg_compression_threads = pt->get<unsigned int>(PATH_NR_THREADS);
+    cfg_full_img_msg = pt->get<bool>(PATH_BATCH_THREAD);
+    cfg_postprocessing = pt->get<bool>(PATH_POST_PROCESS);
+    cfg_simulation = pt->get<bool>(PATH_LADYBUG);
+    cfg_panoramic = pt->get<bool>(PATH_PANO);
+    cfg_pano_width = pt->get<int>(PATH_PANO_WIDTH);
+    cfg_pano_hight = pt->get<unsigned int>(PATH_PANO_HIGHT);
+    cfg_ladybug_colorProcessing = ladybugColorProcessingMap.right.find( pt->get<std::string>(PATH_COLOR_PROCESSING))->second;    
+    cfg_ladybug_dataformat = ladybugDataFormatMap.right.find( pt->get<std::string>(PATH_LB_DATA))->second;
+    cfg_ladybug_autoExposureMode = ladybugAutoExposureModeMap.right.find( pt->get<std::string>(PATH_EXPOSURE))->second;
+    cfg_ladybug_autoShutterRange = ladybugAutoShutterRangeMap.right.find( pt->get<std::string>(PATH_SHUTTER))->second;
 }
 
 const ldf_type ladybugDataFormatMap =
@@ -124,3 +155,55 @@ const lex_type ladybugAutoExposureModeMap =
     ( LADYBUG_AUTO_EXPOSURE_ROI_BOTTOM_50, "BOTTOM_50" )
     ( LADYBUG_AUTO_EXPOSURE_ROI_TOP_50, "TOP_50" )
     ( LADYBUG_AUTO_EXPOSURE_ROI_FORCE_QUADLET, "FORCE_QUADLET" );
+
+template< class MapType >
+void print_map(const MapType & map,
+               const std::string & separator,
+               std::ofstream & os )
+{
+    typedef typename MapType::const_iterator const_iterator;
+
+    for( const_iterator i = map.begin(), iend = map.end(); i != iend; ++i )
+    {
+        //os << i->first << separator << i->second << std::endl;
+        os << i->second << "\n";
+    }
+}
+
+void createOptionsFile(){
+    const char* filename = "config.ini.options.txt";
+    const char* lb = "\n";
+    const char* limitter = "-------------------------------------------";
+
+    std::ofstream file(filename);
+    if(file.is_open() ) //&& tellg() == 0)
+    {
+        std::cout << "Creating " << filename << lb;
+        /* Exposure options */
+        file << "Options" << lb;
+        file << limitter << lb;
+        file << PATH_EXPOSURE << lb;
+        print_map( ladybugAutoExposureModeMap.left, " - ", file);
+           
+        /* Ladybug data options */
+        file << limitter << lb;
+        file << PATH_LB_DATA << lb;
+        print_map( ladybugDataFormatMap.left, " - ", file);
+
+        /* Color Processing options */
+        file << limitter << lb;
+        file << PATH_COLOR_PROCESSING << lb;
+        print_map( ladybugColorProcessingMap.left, " - ", file);
+
+        /* Shutter options */
+        file << limitter << lb;
+        file << PATH_SHUTTER << lb;
+        print_map( ladybugAutoShutterRangeMap.left, " - ", file);
+        file.flush();
+        file.close();
+    }
+    else
+    {
+        printf("Creating the option file failed\n");
+    }
+}

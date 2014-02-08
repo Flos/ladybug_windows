@@ -1,25 +1,10 @@
 #include "timing.h"
 #include "client.h"
 
-std::string cfg_ros_master = "tcp://192.168.1.178:28882";
-std::string cfg_configFile = "config.ini";
-bool cfg_threading = true;
-bool cfg_panoramic = false;
-bool cfg_simulation = false;
-bool cfg_postprocessing = false;
-bool cfg_full_img_msg = true;
-unsigned int cfg_compression_threads = 4; 
-/* The size of the stitched image */
-unsigned int cfg_pano_width = 4096;
-unsigned int cfg_pano_hight = 2048;
-LadybugDataFormat cfg_ladybug_dataformat = LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW8;
-LadybugColorProcessingMethod cfg_ladybug_colorProcessing = LADYBUG_DOWNSAMPLE4;//LADYBUG_NEAREST_NEIGHBOR_FAST; //LADYBUG_DOWNSAMPLE4;
-LadybugAutoShutterRange cfg_ladybug_autoShutterRange = LADYBUG_AUTO_SHUTTER_MOTION;
-LadybugAutoExposureMode cfg_ladybug_autoExposureMode = LADYBUG_AUTO_EXPOSURE_ROI_FULL_IMAGE ;
-
 void main( int argc, char* argv[] ){
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-    printf("Start ladybug5_windows_client\n");
+    printf("Start %s\n", argv[0]);
+    createOptionsFile();
     setlocale(LC_ALL, ".OCP");
 
     boost::property_tree::ptree pt;
@@ -40,8 +25,8 @@ void main( int argc, char* argv[] ){
         }
     }
     printTree(pt, 0);
-    printf("\nWating 3 sec...\n");
-    Sleep(3000);
+    printf("\nWating 10 sec...");
+    Sleep(10000);
 
     if(!cfg_threading){
         singleThread();
