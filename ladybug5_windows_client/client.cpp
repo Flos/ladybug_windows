@@ -2,6 +2,10 @@
 #include "client.h"
 
 void main( int argc, char* argv[] ){
+
+    //openPgrFile("ladybug_13122828_20130821_170012-000000.pgr");
+    //openPgrFile("ladybug_13122828_20130919_105903-000000.pgr");
+
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     printf("Start %s\n", argv[0]);
     createOptionsFile();
@@ -33,10 +37,10 @@ void main( int argc, char* argv[] ){
     }
     else{
 	    zmq::context_t context(1);
-
-	    boost::thread_group threads;
-        if(cfg_simulation){
-            threads.create_thread(std::bind(ladybugSimulator, &context)); //image grabbing thread
+        boost::thread_group threads;
+        if(cfg_fileStream.size()>0){
+            //threads.create_thread(std::bind(ladybugSimulator, &context)); //image grabbing thread
+            threads.create_thread(std::bind(ladybugFileStreamThread,&context, (char*)cfg_fileStream.c_str())); //"input\ladybug_13122828_20130919_105903-000000.pgr");
         }
         else{
             threads.create_thread(std::bind(ladybugThread, &context, "inproc://uncompressed")); // ladybug thread
@@ -45,7 +49,7 @@ void main( int argc, char* argv[] ){
         for(unsigned int i=0; i< cfg_compression_threads; ++i){
 		    threads.create_thread(std::bind(compresseionThread, &context, i)); //worker thread (jpg-compression)
 	    }
-
+        threads.create_thread(std::bind(sendingThread, &context));
 	    while(true){
 		    Sleep(1000);
 	    }

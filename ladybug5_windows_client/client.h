@@ -55,6 +55,7 @@ void ladybugThread(zmq::context_t* p_zmqcontext, std::string imageReciever);
 void ladybugSimulator(zmq::context_t* p_zmqcontext );
 void compresseionThread(zmq::context_t* p_zmqcontext, int i);
 void sendingThread(zmq::context_t* p_zmqcontext);
+void ladybugFileStreamThread(zmq::context_t* p_zmqcontext, char* filename);
 int singleThread();
 
 

@@ -246,6 +246,7 @@
     <ClCompile Include="ladybug_stream.cpp" />
     <ClCompile Include="protobuf_helper.cpp" />
     <ClCompile Include="thread_ladybug.cpp" />
+    <ClCompile Include="thread_ladybug_file_stream.cpp" />
     <ClCompile Include="thread_sending.cpp" />
     <ClCompile Include="thread_simulator.cpp" />
     <ClCompile Include="thread_ladybug_single.cpp" />
