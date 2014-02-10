@@ -7,8 +7,6 @@
 #include <conio.h>
 #include <string.h>
 #include <assert.h>
-#include <fstream>
-#include <iostream>
 
 //=============================================================================
 // PGR Includes
@@ -21,7 +19,6 @@
 //=============================================================================
 // Other Includes
 //=============================================================================
-#include "turbojpeg.h"
 #include <boost/thread.hpp>
 #include <assert.h>
 #include "protobuf/imageMessage.pb.h"
@@ -32,6 +29,13 @@
 #include "configuration_helper.h"
 #include "zhelpers.h"
 #include <locale.h>
+
+//
+// Includes
+//
+#include "functions.h"
+#include "configuration_helper.h"
+#include "ladybug_stream.h"
 
 //=============================================================================
 // Macro Definitions
@@ -65,9 +69,3 @@ bool pb_send(zmq::socket_t* socket, const ladybug5_network::pbMessage* pb_messag
 /* Recieve and deserialize the request to a ladybug5_network::pbMessage object*/
 bool pb_recv(zmq::socket_t* socket, ladybug5_network::pbMessage* pb_message);
 
-/*Helper*/
-unsigned int initBuffers(unsigned char** arpBuffers, unsigned int number, unsigned int width, unsigned int height, unsigned int dimensions = 4);
-void initBuffersWitPicture(unsigned char** arpBuffers, long unsigned int* size);
-void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zmq_msg, int i, TJPF color = TJPF_BGRA);
-void addImageToMessage(ladybug5_network::pbMessage *message,  unsigned char* uncompressedBGRImageBuffer, TJPF color, ladybug5_network::LadybugTimeStamp *timestamp, ladybug5_network::ImageType img_type, int _width, int _height);
-void jpegEncode(unsigned char* _compressedImage, unsigned long *_jpegSize, unsigned char* srcBuffer, int JPEG_QUALITY, int _width, int _height );

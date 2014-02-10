@@ -1,5 +1,4 @@
-#include "timing.h"
-#include "client.h"
+#include "functions.h"
 
 void compressImages(ladybug5_network::pbMessage *message, unsigned char* arpBuffers, TJPF TJPF_BGRA, ladybug5_network::LadybugTimeStamp *msg_timestamp, int uiRawCols, int uiRawRows )
 {
@@ -120,4 +119,14 @@ void initBuffersWitPicture(unsigned char** arpBuffers, long unsigned int* size){
 			std::cout << "Cant open file " << filename << std::endl;
 		}
 	}
+}
+
+void writeToFile(std::string filename, char* data, size_t size){
+    std::ofstream file(filename, std::ios::binary);
+    if(file.is_open() ) 
+    {
+        file.write(data, size);
+        file.flush();
+        file.close();
+    }
 }

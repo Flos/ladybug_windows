@@ -57,12 +57,15 @@ typedef boost::bimap< LadybugOutputImage, std::string > loi_type;
 typedef boost::bimap< LadybugAutoShutterRange, std::string > lsr_type;
 typedef boost::bimap< LadybugAutoExposureMode, std::string > lex_type;
 
-/*Config*/
-void printTree (boost::property_tree::ptree &pt, int level);
-void createDefaultIni(boost::property_tree::ptree *pt);
-void loadConfigsFromPtree(boost::property_tree::ptree *pt);
-void createOptionsFile();
+/* enum maps */
 extern const ldf_type ladybugDataFormatMap;
 extern const lcpm_type ladybugColorProcessingMap;
 extern const lsr_type ladybugAutoShutterRangeMap;
 extern const lex_type ladybugAutoExposureModeMap;
+
+/*functions*/
+void printTree (boost::property_tree::ptree &pt, int level);
+void createDefaultIni(boost::property_tree::ptree *pt);
+void loadConfigsFromPtree(boost::property_tree::ptree *pt);
+void createOptionsFile();
+
