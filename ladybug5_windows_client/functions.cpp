@@ -46,6 +46,47 @@ void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zm
     _TIME
 }
 
+zmq::message_t compressImageToZmqMsg(ladybug5_network::pbMessage *message, zmq::message_t* zmq_msg, int i, TJPF color){
+	//encode to jpg
+    double t_now = clock();
+	std::string status = "Compression";
+	unsigned char* _compressedImage = 0;
+	int JPEG_QUALITY = 85;
+	
+	int img_width =  message->images(i).width();
+	int img_hight =  message->images(i).hight();
+	unsigned long img_Size = 0;
+	ladybug5_network::ImageType img_type = message->images(i).type();
+
+	unsigned char* pointer = (unsigned char*)zmq_msg->data();
+	assert(zmq_msg->size()!=0);
+	assert(img_width!=0);
+	assert(img_hight!=0);
+	tjhandle _jpegCompressor = tjInitCompress();
+	tjCompress2(_jpegCompressor, pointer, img_width, 0, img_hight, color,
+				&_compressedImage, &img_Size, TJSAMP_420, JPEG_QUALITY,
+				TJFLAG_FASTDCT);
+	tjDestroy(_jpegCompressor);
+    _TIME
+    status = "updating image message";
+	assert(img_Size!=0);
+
+    zmq::message_t img_out(img_Size);
+    memcpy(img_out.data(), _compressedImage, img_Size);
+
+	ladybug5_network::LadybugTimeStamp* msg_timestamp = new ladybug5_network::LadybugTimeStamp(message->images(i).time());
+	//append to message
+
+	//message->clear_images();
+	ladybug5_network::pbImage* img_msg =(ladybug5_network::pbImage*) &message->images(i);
+	img_msg->set_image(_compressedImage, img_Size);
+	img_msg->set_size(img_Size);
+
+	tjFree(_compressedImage);
+    _TIME
+    return img_out;
+}
+
 void addImageToMessage(ladybug5_network::pbMessage *message,  unsigned char* uncompressedBGRImageBuffer, TJPF color, ladybug5_network::LadybugTimeStamp *timestamp, ladybug5_network::ImageType img_type, int _width, int _height){
 	//encode to jpg
 	//const int COLOR_COMPONENTS = 4;
@@ -105,7 +146,7 @@ void initBuffersWitPicture(unsigned char** arpBuffers, long unsigned int* size){
 	for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 	{
 		char filename[24]; 
-		std::sprintf(filename, "CAM%i.bmp", uiCamera);
+		std::sprintf(filename, "input\\CAM%i.bmp", uiCamera);
 		std::ifstream file (filename, std::ios::in|std::ios::binary|std::ios::ate);
 		if (file.is_open())
 		{

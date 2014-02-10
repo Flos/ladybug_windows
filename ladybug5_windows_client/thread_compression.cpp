@@ -27,36 +27,33 @@ void compresseionThread(zmq::context_t* p_zmqcontext, int i)
         int more;
         size_t more_size = sizeof (more);
         
+        pb_recv(&socket_in, &pb_msg);
         do{
             socket_in.recv(&arpBuffer[numImages]);
             socket_in.getsockopt(ZMQ_RCVMORE, &more, &more_size);
              ++numImages;
             printf("compression recieved image: %i more: %i\n", numImages, more, more_size);
-            if(more && (numImages == LADYBUG_NUM_CAMERAS || !cfg_full_img_msg)){
-                pb_recv(&socket_in, &pb_msg);
-                socket_in.getsockopt(ZMQ_RCVMORE, &more, &more_size);
-                printf("compression recieved pb message: %i more: %i\n", numImages, more, more_size);
-            }
         }
         while(more);
          _TIME
 
-		//socket_in.send(zmq_ready); /* send emtpy message, to sign that the other thread can continue*/
-
-		//assert(pb_msg.images(0).image().length()!=0);
-		//assert(pb_msg.images(0).image().size()!=0);
 	    status = "compresseionThread compress jpg";
+         zmq::message_t* buffer[LADYBUG_NUM_CAMERAS];
         for(int i=0 ; i < numImages; ++i){
-            compressImageToMsg(&pb_msg, &arpBuffer[i], i);
+            buffer[i] = &compressImageToZmqMsg(&pb_msg, &arpBuffer[i], i);
         }
 		
         _TIME
         status = "compresseionThread serialise and send";
-		pb_send(&socket_out, &pb_msg);
+
+        pb_send(&socket_out, &pb_msg, ZMQ_SNDMORE);
+
+        for(int i=0; i < numImages; ++i){
+            socket_out.send(buffer[i], i == LADYBUG_NUM_CAMERAS-1 ? 0 : ZMQ_SNDMORE);
+        }
+
 		pb_msg.Clear();
         _TIME
-		//zmq::message_t empty;
-		//socket_out.recv(&empty);		
 	}
 }
 

@@ -111,35 +111,37 @@ _RESTART:
 
 				error = ladybugConvertImage(context, &image, arpBuffers);
 				_HANDLE_ERROR
-
+                /* Create protobuf message*/
 				for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 				{
 					message.set_name("windows");
 				    message.set_camera("ladybug5");
 					ladybug5_network::pbImage* image_msg = 0;
 					image_msg = message.add_images();
-					//image_msg->set_image(arpBuffers[uiCamera], image_size);
 					image_msg->set_size(image_size);
 					image_msg->set_type((ladybug5_network::ImageType) ( 1 << uiCamera));
 					image_msg->set_name(enumToString(image_msg->type()));
 					image_msg->set_allocated_time(new ladybug5_network::LadybugTimeStamp(msg_timestamp));
 					image_msg->set_hight(uiRawRows);
-					image_msg->set_width(uiRawCols);
+                    image_msg->set_width(uiRawCols);
+                }
+                pb_send(&socket, &message, ZMQ_SNDMORE);
 
-					zmq::message_t image(image_size);
+                for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
+                {
+                    //send images
+                    zmq::message_t image(image_size);
                     memcpy(image.data(), arpBuffers[uiCamera], image_size);
-                    if( !cfg_full_img_msg || uiCamera == LADYBUG_NUM_CAMERAS-1 ){
-                        socket.send(image, ZMQ_SNDMORE);
-                        pb_send(&socket, &message, 0);
-                        message.Clear();
-                        printf("Ladybug thread send msg");
+                    if( uiCamera == LADYBUG_NUM_CAMERAS-1 ){
+                         socket.send(image, 0 );
                     }else{
                         socket.send(image, ZMQ_SNDMORE);
                     }
 				}
+                message.Clear();
                 if(cfg_panoramic){
                     printf("Panoramic output not supported while multithreading\n");
-                }
+                }					
 				_TIME
 			}
 			catch(std::exception e){
