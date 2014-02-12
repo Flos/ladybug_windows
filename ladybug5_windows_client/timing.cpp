@@ -8,7 +8,6 @@ double time_diff(std::string status, double start, std::string name){
 	return t_now;
 }
 
-
 std::string enumToString(ladybug5_network::ImageType type){
 	switch (type){
 	case ladybug5_network::LADYBUG_DOME:

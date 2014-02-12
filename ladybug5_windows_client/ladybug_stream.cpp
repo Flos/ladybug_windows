@@ -17,6 +17,32 @@ struct jpgPositionAndSize{
     unsigned int size;
 };
 
+void getColorOffset(LadybugImage *image, unsigned int& red_idx_offset, unsigned int& green_idx_offset, unsigned int& blue_idx_offset){
+    switch(image->stippledFormat){
+    case LADYBUG_BGGR:
+        red_idx_offset = 3; 
+        green_idx_offset = 1;
+        blue_idx_offset = 0;
+        break;
+    case LADYBUG_GBRG:
+        red_idx_offset = 2; 
+        green_idx_offset = 0;
+        blue_idx_offset = 1;
+        break;
+    case LADYBUG_GRBG:
+        red_idx_offset = 1; 
+        green_idx_offset = 0;
+        blue_idx_offset = 2;
+        break;
+    case LADYBUG_RGGB:
+        red_idx_offset = 0; 
+        green_idx_offset = 1;
+        blue_idx_offset = 3;
+        break;
+    default:
+        throw new std::exception("getColorOffset, this image stippledFormat not implemted");
+    }
+}
 
 void extractImagesToFiles(LadybugImage* image){
     unsigned int imgCount = getImageCount(image); /* every channel as jpg */
@@ -50,19 +76,19 @@ void extractImagesToFiles(LadybugImage* image){
     }    
 }
 
-void extractImageToMsg(LadybugImage* image, unsigned int i, zmq::message_t* msg){
+void extractImageToMsg(LadybugImage* image, unsigned int i, char** begin, unsigned int& size){
     unsigned int imgCount = getImageCount(image);
     if(isColorSeperated(image))
     {
         jpgPositionAndSize jpg;
         unsigned int offset = 0x0340 + i*8;
         unsigned int image_offset = *(unsigned int*)&image->pData[offset];
-        unsigned int image_size =  *(unsigned int*)&image->pData[offset+4];
+        unsigned int image_size = *(unsigned int*)&image->pData[offset+4];
         jpg.size = BigLiltleEndianSwap(image_size); // jpg size and offset is stored in big endian
         jpg.offset = BigLiltleEndianSwap(image_offset); // jpg size and offset is stored in big endian
 
-        msg = new zmq::message_t(jpg.size);
-        memcpy(msg->data(), (char*)&image->pData[jpg.offset], jpg.size);
+        *begin = (char*)&image->pData[jpg.offset];
+        size =  jpg.size;
         return;
     }
     else{
@@ -71,8 +97,8 @@ void extractImageToMsg(LadybugImage* image, unsigned int i, zmq::message_t* msg)
         unsigned int dataDepth = getDataBitDepth(image);
        
         unsigned int imageSize = (resolution*dataDepth*colorChannels)/8;
-        msg = new zmq::message_t(imageSize);
-        memcpy(msg->data(), (char*)&image->pData[i*imageSize], imageSize);
+        *begin = (char*)&image->pData[i*imageSize];
+        size =  imageSize;
         return;
     }    
 }

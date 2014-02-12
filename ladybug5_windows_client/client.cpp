@@ -40,7 +40,7 @@ void main( int argc, char* argv[] ){
         boost::thread_group threads;
         if(cfg_fileStream.size()>0){
             //threads.create_thread(std::bind(ladybugSimulator, &context)); //image grabbing thread
-            threads.create_thread(std::bind(ladybugFileStreamThread,&context, (char*)cfg_fileStream.c_str())); //"input\ladybug_13122828_20130919_105903-000000.pgr");
+            threads.create_thread(std::bind(ladybugFileStreamThread, &context, (char*)cfg_fileStream.c_str())); //"input\ladybug_13122828_20130919_105903-000000.pgr");
         }
         else{
             threads.create_thread(std::bind(ladybugThread, &context, "inproc://uncompressed")); // ladybug thread
@@ -49,7 +49,8 @@ void main( int argc, char* argv[] ){
         for(unsigned int i=0; i< cfg_compression_threads; ++i){
 		    threads.create_thread(std::bind(compresseionThread, &context, i)); //worker thread (jpg-compression)
 	    }
-        threads.create_thread(std::bind(sendingThread, &context));
+        
+        //threads.create_thread(std::bind(sendingThread, &context));
 	    while(true){
 		    Sleep(1000);
 	    }

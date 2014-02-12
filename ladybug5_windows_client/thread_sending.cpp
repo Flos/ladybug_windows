@@ -14,14 +14,19 @@ void sendingThread(zmq::context_t* p_zmqcontext){
 	zmq::socket_t socket_out(*p_zmqcontext, ZMQ_PUB);
 	socket_out.connect(cfg_ros_master.c_str());
     _TIME
-
-	while(true){
+    
+    int more;
+    size_t more_size = sizeof (more);
+	
+    while(true){
         status = "SendingThread: Recived message";
 		zmq::message_t in1;
         socket_in.recv(&in1);
+        socket_in.getsockopt(ZMQ_RCVMORE, &more, &more_size);
+        std::cout << "SendingThread: Recieved message with size:" << in1.size() << std::endl;
         _TIME
         status = "SendingThread: Send message";
-        socket_out.send(in1);  
+        socket_out.send(in1, more? ZMQ_SNDMORE: 0);  
         _TIME
 	}
 }
