@@ -1,4 +1,4 @@
-#include "functions.h"
+#include "helper.h"
 
 void compressImages(ladybug5_network::pbMessage *message, unsigned char* arpBuffers, TJPF TJPF_BGRA, ladybug5_network::LadybugTimeStamp *msg_timestamp, int uiRawCols, int uiRawRows )
 {
@@ -16,25 +16,22 @@ void compressImageToMsg(ladybug5_network::pbMessage *message, zmq::message_t* zm
 	int JPEG_QUALITY = 85;
 	
 	int img_width =  message->images(i).width();
-	int img_hight =  message->images(i).hight();
+	int img_height =  message->images(i).height();
 	unsigned long img_Size = 0;
 	ladybug5_network::ImageType img_type = message->images(i).type();
 
 	unsigned char* pointer = (unsigned char*)zmq_msg->data();
 	assert(zmq_msg->size()!=0);
 	assert(img_width!=0);
-	assert(img_hight!=0);
+	assert(img_height!=0);
 	tjhandle _jpegCompressor = tjInitCompress();
-	tjCompress2(_jpegCompressor, pointer, img_width, 0, img_hight, color,
+	tjCompress2(_jpegCompressor, pointer, img_width, 0, img_height, color,
 				&_compressedImage, &img_Size, TJSAMP_420, JPEG_QUALITY,
 				TJFLAG_FASTDCT);
 	tjDestroy(_jpegCompressor);
     _TIME
     status = "updating image message";
 	assert(img_Size!=0);
-
-	ladybug5_network::LadybugTimeStamp* msg_timestamp = new ladybug5_network::LadybugTimeStamp(message->images(i).time());
-	//append to message
 
 	//message->clear_images();
 	ladybug5_network::pbImage* img_msg =(ladybug5_network::pbImage*) &message->images(i);
@@ -54,16 +51,16 @@ zmq::message_t compressImageToZmqMsg(ladybug5_network::pbMessage *message, zmq::
 	int JPEG_QUALITY = 85;
 	
 	int img_width =  message->images(i).width();
-	int img_hight =  message->images(i).hight();
+	int img_height =  message->images(i).height();
 	unsigned long img_Size = 0;
 	ladybug5_network::ImageType img_type = message->images(i).type();
 
 	unsigned char* pointer = (unsigned char*)zmq_msg->data();
 	assert(zmq_msg->size()!=0);
 	assert(img_width!=0);
-	assert(img_hight!=0);
+	assert(img_height!=0);
 	tjhandle _jpegCompressor = tjInitCompress();
-	tjCompress2(_jpegCompressor, pointer, img_width, 0, img_hight, color,
+	tjCompress2(_jpegCompressor, pointer, img_width, 0, img_height, color,
 				&_compressedImage, &img_Size, TJSAMP_420, JPEG_QUALITY,
 				TJFLAG_FASTDCT);
 	tjDestroy(_jpegCompressor);
@@ -73,9 +70,6 @@ zmq::message_t compressImageToZmqMsg(ladybug5_network::pbMessage *message, zmq::
 
     zmq::message_t img_out(img_Size);
     memcpy(img_out.data(), _compressedImage, img_Size);
-
-	ladybug5_network::LadybugTimeStamp* msg_timestamp = new ladybug5_network::LadybugTimeStamp(message->images(i).time());
-	//append to message
 
 	//message->clear_images();
 	ladybug5_network::pbImage* img_msg =(ladybug5_network::pbImage*) &message->images(i);
@@ -107,7 +101,6 @@ void addImageToMessage(ladybug5_network::pbMessage *message,  unsigned char* unc
 	image_msg->set_size(imgSize);
 	image_msg->set_type(img_type);
 	image_msg->set_name(enumToString(img_type));
-	image_msg->set_allocated_time(new ladybug5_network::LadybugTimeStamp(*timestamp));
 	tjFree(_compressedImage);
 }
 

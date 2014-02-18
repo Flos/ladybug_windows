@@ -1,5 +1,5 @@
+#include "thread_functions.h"
 #include "timing.h"
-#include "client.h"
 
 void ladybugSimulator(zmq::context_t* p_zmqcontext ){
 	std::string connection = "inproc://uncompressed";
@@ -37,6 +37,8 @@ void ladybugSimulator(zmq::context_t* p_zmqcontext ){
 		msg_timestamp.set_ulcycleseconds(5);
 		msg_timestamp.set_ulmicroseconds(3);
 		msg_timestamp.set_ulseconds(7);
+        message.set_allocated_time(new ladybug5_network::LadybugTimeStamp(msg_timestamp));
+      
 
 		for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 		{
@@ -47,10 +49,9 @@ void ladybugSimulator(zmq::context_t* p_zmqcontext ){
 			image_msg->set_size( size[uiCamera]);
 			image_msg->set_type((ladybug5_network::ImageType) ( 1 << uiCamera));
 			image_msg->set_name(enumToString(image_msg->type()));
-			image_msg->set_hight(uiRawCols);
+			image_msg->set_height(uiRawCols);
 			image_msg->set_width(uiRawRows);
-			image_msg->set_allocated_time(new ladybug5_network::LadybugTimeStamp(msg_timestamp));
-        }
+	   }
 
         pb_send(&socket, &message, ZMQ_SNDMORE);
 

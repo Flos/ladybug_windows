@@ -1,5 +1,5 @@
-#include "timing.h"
-#include "client.h"
+#include "ladybug_helper.h"
+
 //
 // This function reads an image from camera
 //
@@ -195,4 +195,21 @@ LadybugError saveImages(LadybugContext context, int i){
 
 _EXIT:
 	return error;
+}
+
+
+void extractCalibration( LadybugContext context, LadybugImage *image){
+    LadybugCameraInfo info;
+    ladybugGetCameraInfo(context, &info);
+    for(int i = 0; i < 6; ++i){
+        double extrinsics[6];
+        ladybugGetCameraUnitExtrinsics(context, i, extrinsics);
+        double focal_lenght; 
+        ladybugGetCameraUnitFocalLength(context, i, &focal_lenght);
+        double centerX,centerY;
+        ladybugGetCameraUnitImageCenter(context , i, &centerX, &centerY);
+        printf("Camera %i Extrensics: [%f, %f, %f, %f, %f, %f]", i, extrinsics[0], extrinsics[1], extrinsics[2], extrinsics[3], extrinsics[4], extrinsics[5]); 
+        printf("FocalLength: %f", focal_lenght);
+        printf("CameraUnitImageCenter: %f, %f", focal_lenght);
+    }
 }

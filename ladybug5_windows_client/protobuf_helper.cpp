@@ -1,4 +1,4 @@
-#include "client.h"
+#include "protobuf_helper.h"
 
 bool pb_send(zmq::socket_t* socket, const ladybug5_network::pbMessage* pb_message, int flag){
 	// serialize the request to a string

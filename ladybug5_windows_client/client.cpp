@@ -32,25 +32,23 @@ void main( int argc, char* argv[] ){
     printf("\nWating 10 sec...");
     Sleep(10000);
 
-    if(!cfg_threading){
-        singleThread();
-    }
-    else{
+   {
 	    zmq::context_t context(1);
         boost::thread_group threads;
-        if(cfg_fileStream.size()>0){
-            //threads.create_thread(std::bind(ladybugSimulator, &context)); //image grabbing thread
-            threads.create_thread(std::bind(ladybugFileStreamThread, &context, (char*)cfg_fileStream.c_str())); //"input\ladybug_13122828_20130919_105903-000000.pgr");
-        }
-        else{
-            threads.create_thread(std::bind(ladybugThread, &context, "inproc://uncompressed")); // ladybug thread
-        }
-	
-        for(unsigned int i=0; i< cfg_compression_threads; ++i){
-		    threads.create_thread(std::bind(compresseionThread, &context, i)); //worker thread (jpg-compression)
-	    }
+
+        thread_ladybug_full(&context);
         
-        //threads.create_thread(std::bind(sendingThread, &context));
+        if(!cfg_threading || !cfg_postprocessing ){
+            singleThread();
+        }else             {
+            threads.create_thread(std::bind(ladybugThread, &context, "inproc://uncompressed"));
+            for(unsigned int i=0; i< cfg_compression_threads; ++i){
+        	    threads.create_thread(std::bind(compresseionThread, &context, i)); //worker thread (jpg-compression)
+        }
+            threads.create_thread(std::bind(sendingThread, &context));
+        }
+        
+	
 	    while(true){
 		    Sleep(1000);
 	    }

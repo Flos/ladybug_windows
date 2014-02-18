@@ -3,7 +3,7 @@
 #include <ladybuggeom.h>
 #include <iostream>
 #include <sstream>
-#include "functions.h"
+#include "helper.h"
 #include <assert.h>
 
 unsigned int getDataBitDepth(LadybugImage* image);

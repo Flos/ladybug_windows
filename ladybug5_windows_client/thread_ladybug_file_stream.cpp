@@ -1,6 +1,5 @@
+#include "thread_functions.h"
 #include "timing.h"
-#include "client.h"
-#include "ladybug_stream.h"
 
 void ladybugFileStreamThread(zmq::context_t* p_zmqcontext, char* filename ){
     double t_now = clock();	
@@ -13,6 +12,8 @@ void ladybugFileStreamThread(zmq::context_t* p_zmqcontext, char* filename ){
     unsigned int stream_image_count;
     unsigned int frame_image_count;
     bool seperatedColors;
+    unsigned int red_offset,green_offset,blue_offset;
+
     //
     // Create contexts and prepare stream for reading
     //
@@ -32,7 +33,7 @@ void ladybugFileStreamThread(zmq::context_t* p_zmqcontext, char* filename ){
     std::string connection;
     seperatedColors = isColorSeperated(&image);
     frame_image_count = getImageCount(&image);
-    unsigned int red_offset,green_offset,blue_offset;
+
     getColorOffset(&image, red_offset, green_offset, blue_offset);
 
     zmq::socket_t* socket;
@@ -65,13 +66,13 @@ void ladybugFileStreamThread(zmq::context_t* p_zmqcontext, char* filename ){
 		status = "Process image loop sending";
 		double loopstart = t_now = clock();	
 		t_now = loopstart;
-        int flag = 1;
 			
 		msg_timestamp.set_ulcyclecount(image.timeStamp.ulCycleCount);
 		msg_timestamp.set_ulcycleoffset(image.timeStamp.ulCycleOffset);
 		msg_timestamp.set_ulcycleseconds(image.timeStamp.ulCycleSeconds);
 		msg_timestamp.set_ulmicroseconds(image.timeStamp.ulMicroSeconds);
 		msg_timestamp.set_ulseconds(image.timeStamp.ulSeconds);
+        message.set_allocated_time(new ladybug5_network::LadybugTimeStamp(msg_timestamp));
 
 		for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 		{
@@ -82,8 +83,7 @@ void ladybugFileStreamThread(zmq::context_t* p_zmqcontext, char* filename ){
 			image_msg = message.add_images();
 			image_msg->set_type((ladybug5_network::ImageType) ( 1 << uiCamera));
 			image_msg->set_name(enumToString(image_msg->type()));
-			image_msg->set_allocated_time(new ladybug5_network::LadybugTimeStamp(msg_timestamp));
-			image_msg->set_hight(image.uiRows);
+			image_msg->set_height(image.uiRows);
             image_msg->set_width(image.uiCols);
             if(seperatedColors){
                 image_msg->set_packages(3);

@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="client.cpp" />
+    <ClCompile Include="configuration_helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="timing.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_compression.cpp">
+      <Filter>threads</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_sending.cpp">
+      <Filter>threads</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_simulator.cpp">
+      <Filter>threads</Filter>
+    </ClCompile>
+    <ClCompile Include="protobuf\imageMessage.pb.cc">
+      <Filter>protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="ladybug_stream.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="protobuf_helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_ladybug_full.cpp">
+      <Filter>threads</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_ladybug.cpp">
+      <Filter>threads\old</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_ladybug_file_stream.cpp">
+      <Filter>threads\old</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_ladybug_single.cpp">
+      <Filter>threads\old</Filter>
+    </ClCompile>
+    <ClCompile Include="ladybug_helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="protobuf\imageMessage.pb.h">
+      <Filter>protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="configuration_helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="ladybug_stream.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="timing.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="client.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="ladybug_helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="thread_functions.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="protobuf_helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="client.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\icons\PtGreyExample.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="helper">
+      <UniqueIdentifier>{e92c95e1-25e5-4f8b-b18e-07833a70072e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="threads">
+      <UniqueIdentifier>{3a8680de-4c17-4dcc-8771-f5382922c3ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protobuf">
+      <UniqueIdentifier>{d505ac08-ed0a-4890-950b-3e0cb311afdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="threads\old">
+      <UniqueIdentifier>{f607616f-1e76-4436-9dba-4243ad5c982d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header">
+      <UniqueIdentifier>{0ca2853e-6f28-4bcb-b0c0-58d0fca834fb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

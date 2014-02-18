@@ -1,5 +1,5 @@
+#include "thread_functions.h"
 #include "timing.h"
-#include "client.h"
 
 void ladybugThread(zmq::context_t* p_zmqcontext, std::string imageReciever)
 {
@@ -108,6 +108,7 @@ _RESTART:
 				msg_timestamp.set_ulcycleseconds(image.timeStamp.ulCycleSeconds);
 				msg_timestamp.set_ulmicroseconds(image.timeStamp.ulMicroSeconds);
 				msg_timestamp.set_ulseconds(image.timeStamp.ulSeconds);
+                message.set_allocated_time(new ladybug5_network::LadybugTimeStamp(msg_timestamp));
 
 				error = ladybugConvertImage(context, &image, arpBuffers);
 				_HANDLE_ERROR
@@ -121,8 +122,7 @@ _RESTART:
 					image_msg->set_size(image_size);
 					image_msg->set_type((ladybug5_network::ImageType) ( 1 << uiCamera));
 					image_msg->set_name(enumToString(image_msg->type()));
-					image_msg->set_allocated_time(new ladybug5_network::LadybugTimeStamp(msg_timestamp));
-					image_msg->set_hight(uiRawRows);
+					image_msg->set_height(uiRawRows);
                     image_msg->set_width(uiRawCols);
                 }
                 pb_send(&socket, &message, ZMQ_SNDMORE);

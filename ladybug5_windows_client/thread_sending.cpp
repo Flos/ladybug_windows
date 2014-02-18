@@ -1,5 +1,5 @@
+#include "thread_functions.h"
 #include "timing.h"
-#include "client.h"
 
 void sendingThread(zmq::context_t* p_zmqcontext){
     std::string status = "Sendin Thread: init";

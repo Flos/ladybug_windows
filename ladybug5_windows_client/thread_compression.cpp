@@ -1,5 +1,5 @@
+#include "thread_functions.h"
 #include "timing.h"
-#include "client.h"
 
 void compresseionThread(zmq::context_t* p_zmqcontext, int i)
 {	

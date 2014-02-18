@@ -117,6 +117,9 @@ unsigned int getDataBitDepth(LadybugImage* image){
             case LADYBUG_DATAFORMAT_RAW16:
             case LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW16:
                 return 16;
+                break;
+            default:
+                throw new std::exception("bit size can not be dettermined");
      }
 }
 
