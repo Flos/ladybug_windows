@@ -3,9 +3,6 @@
 
 void main( int argc, char* argv[] ){
 
-    //openPgrFile("ladybug_13122828_20130821_170012-000000.pgr");
-    //openPgrFile("ladybug_13122828_20130919_105903-000000.pgr");
-
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     printf("Start %s\n", argv[0]);
     createOptionsFile();
@@ -29,31 +26,12 @@ void main( int argc, char* argv[] ){
         }
     }
     printTree(pt, 0);
-    printf("\nWating 10 sec...");
-    Sleep(10000);
-
-   {
-	    zmq::context_t context(1);
-        boost::thread_group threads;
-
-        thread_ladybug_full(&context);
-        
-        if(!cfg_threading || !cfg_postprocessing ){
-            singleThread();
-        }else             {
-            threads.create_thread(std::bind(ladybugThread, &context, "inproc://uncompressed"));
-            for(unsigned int i=0; i< cfg_compression_threads; ++i){
-        	    threads.create_thread(std::bind(compresseionThread, &context, i)); //worker thread (jpg-compression)
-        }
-            threads.create_thread(std::bind(sendingThread, &context));
-        }
-        
-	
-	    while(true){
-		    Sleep(1000);
-	    }
-	    std::printf("<PRESS ANY KEY TO EXIT>");
-	    _getch();
-    }
+    std::cout << std::endl << "Number of Cores: " << boost::thread::hardware_concurrency() << std::endl;  
+    printf("\nWating 5 sec...\n");
+    Sleep(5000);
+    thread_ladybug_full(); 
+	std::printf("<PRESS ANY KEY TO EXIT>");
+	_getch();
 }
+
 

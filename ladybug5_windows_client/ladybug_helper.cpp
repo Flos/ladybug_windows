@@ -1,4 +1,5 @@
 #include "ladybug_helper.h"
+#include <Windows.h>
 
 //
 // This function reads an image from camera

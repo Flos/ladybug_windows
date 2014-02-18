@@ -19,14 +19,19 @@
 #include <ladybugstream.h>
 #define __WINDOWS__ true
 
+/* */
+extern const char* zmq_uncompressed;
+extern const char* zmq_compressed;
+
 extern std::string cfg_ros_master;
 extern std::string cfg_configFile;
-extern bool cfg_threading;
+//extern bool cfg_threading;
 extern bool cfg_panoramic;
+extern bool cfg_transfer_compressed;
 extern std::string cfg_fileStream;
 extern bool cfg_postprocessing;
-extern bool cfg_full_img_msg;
-extern unsigned int cfg_compression_threads; 
+//extern bool cfg_full_img_msg;
+//extern unsigned int cfg_compression_threads; 
 /* The size of the stitched image */
 extern unsigned int cfg_pano_width;
 extern unsigned int cfg_pano_hight;
@@ -37,11 +42,12 @@ extern LadybugAutoExposureMode cfg_ladybug_autoExposureMode;
 
 /* Settings paths */
 extern const char* PATH_ROS_MASTER;
-extern const char* PATH_THREADING;
-extern const char* PATH_NR_THREADS; 
-extern const char* PATH_BATCH_THREAD;
+//extern const char* PATH_THREADING;
+//extern const char* PATH_NR_THREADS; 
+//extern const char* PATH_BATCH_THREAD;
 extern const char* PATH_POST_PROCESS;      
 extern const char* PATH_LADYBUG_STREAMFILE;
+extern const char* PATH_TRANSFER_COMPRESSED;
 extern const char* PATH_PANO;  
 extern const char* PATH_PANO_WIDTH;
 extern const char* PATH_PANO_HIGHT;

@@ -14,9 +14,6 @@
     <ClCompile Include="thread_sending.cpp">
       <Filter>threads</Filter>
     </ClCompile>
-    <ClCompile Include="thread_simulator.cpp">
-      <Filter>threads</Filter>
-    </ClCompile>
     <ClCompile Include="protobuf\imageMessage.pb.cc">
       <Filter>protobuf</Filter>
     </ClCompile>
@@ -43,6 +40,9 @@
     </ClCompile>
     <ClCompile Include="helper.cpp">
       <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_simulator.cpp">
+      <Filter>threads\old</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -2,31 +2,36 @@
 
 /* Settings paths */
 const char* PATH_ROS_MASTER =  "Network.ROS_MASTER";
-const char* PATH_THREADING  =  "Threading.Enabled";
-const char* PATH_NR_THREADS =  "Threading.NumberCompressionThreads"; 
-const char* PATH_BATCH_THREAD ="Threading.OneThreadPerImageGrab";
-const char* PATH_POST_PROCESS=  "Settings.PostProcessing";
-const char* PATH_LADYBUG_STREAMFILE    =   "Ladybug.Filestream";
-const char* PATH_PANO       =   "Ladybug.Panoramic_Only";  
-const char* PATH_PANO_WIDTH =   "Ladybug.PanoWidth";
-const char* PATH_PANO_HIGHT =   "Ladybug.PanoHight";
-const char* PATH_COLOR_PROCESSING = "Ladybug.ColorProcessing";
-const char* PATH_LB_DATA    =   "Ladybug.Dataformat";
-const char* PATH_EXPOSURE   =   "Ladybug.ExposureMode";
-const char* PATH_SHUTTER    =   "Ladybug.ShutterRange";
+const char* PATH_TRANSFER_COMPRESSED = "Network.Compressed";
+//const char* PATH_THREADING  =  "Threading.Enabled";
+//const char* PATH_NR_THREADS =  "Threading.NumberCompressionThreads"; 
+//const char* PATH_BATCH_THREAD ="Threading.OneThreadPerImageGrab";
+const char* PATH_POST_PROCESS=  "Processing.Enabled";
+const char* PATH_LADYBUG_STREAMFILE    =   "Input.Filestream";
+const char* PATH_PANO       =   "Processing.CreatePanoramic";  
+const char* PATH_PANO_WIDTH =   "Processing.PanoWidth";
+const char* PATH_PANO_HIGHT =   "Processing.PanoHeight";
+const char* PATH_COLOR_PROCESSING = "Processing.ColorProcessing";
+const char* PATH_LB_DATA    =   "Capture.Dataformat";
+const char* PATH_EXPOSURE   =   "Capture.ExposureMode";
+const char* PATH_SHUTTER    =   "Capture.ShutterRange";
+
+const char* zmq_uncompressed = "inproc://uncompressed";
+const char* zmq_compressed = "inproc://compressed";
 
 std::string cfg_ros_master = "tcp://10.1.1.1:28882";
 std::string cfg_configFile = "config.ini";
 std::string cfg_fileStream = "";
-bool cfg_threading = true;
+//bool cfg_threading = true;
 bool cfg_panoramic = false;
+bool cfg_transfer_compressed = true;
 bool cfg_postprocessing = false;
-bool cfg_full_img_msg = true;
-unsigned int cfg_compression_threads = 4; 
+//bool cfg_full_img_msg = true;
+//unsigned int cfg_compression_threads = 4; 
 /* The size of the stitched image */
 unsigned int cfg_pano_width = 4096;
 unsigned int cfg_pano_hight = 2048;
-LadybugDataFormat cfg_ladybug_dataformat = LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW8;
+LadybugDataFormat cfg_ladybug_dataformat = LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8;
 LadybugColorProcessingMethod cfg_ladybug_colorProcessing = LADYBUG_DOWNSAMPLE4;//LADYBUG_NEAREST_NEIGHBOR_FAST; //LADYBUG_DOWNSAMPLE4;
 LadybugAutoShutterRange cfg_ladybug_autoShutterRange = LADYBUG_AUTO_SHUTTER_MOTION;
 LadybugAutoExposureMode cfg_ladybug_autoExposureMode = LADYBUG_AUTO_EXPOSURE_ROI_FULL_IMAGE ;
@@ -58,10 +63,11 @@ void printTree (boost::property_tree::ptree &pt, int level) {
 }
 
 void createDefaultIni(boost::property_tree::ptree *pt){
-    pt->put(PATH_ROS_MASTER, cfg_ros_master.c_str());  
-    pt->put(PATH_THREADING, cfg_threading);
-    pt->put(PATH_NR_THREADS, cfg_compression_threads); 
-    pt->put(PATH_BATCH_THREAD, cfg_full_img_msg);
+    pt->put(PATH_ROS_MASTER, cfg_ros_master.c_str()); 
+    pt->put(PATH_TRANSFER_COMPRESSED, cfg_transfer_compressed); 
+    //pt->put(PATH_THREADING, cfg_threading);
+    //pt->put(PATH_NR_THREADS, cfg_compression_threads); 
+    //pt->put(PATH_BATCH_THREAD, cfg_full_img_msg);
     pt->put(PATH_POST_PROCESS, cfg_postprocessing);      
     pt->put(PATH_LADYBUG_STREAMFILE, cfg_fileStream.c_str());
     pt->put(PATH_PANO, cfg_panoramic);  
@@ -76,9 +82,10 @@ void createDefaultIni(boost::property_tree::ptree *pt){
 
 void loadConfigsFromPtree(boost::property_tree::ptree *pt){
     cfg_ros_master = pt->get<std::string>(PATH_ROS_MASTER);
-    cfg_threading = pt->get<bool>(PATH_THREADING);
-    cfg_compression_threads = pt->get<unsigned int>(PATH_NR_THREADS);
-    cfg_full_img_msg = pt->get<bool>(PATH_BATCH_THREAD);
+    cfg_transfer_compressed = pt->get<bool>(PATH_TRANSFER_COMPRESSED); 
+    //cfg_threading = pt->get<bool>(PATH_THREADING);
+    //cfg_compression_threads = pt->get<unsigned int>(PATH_NR_THREADS);
+    //cfg_full_img_msg = pt->get<bool>(PATH_BATCH_THREAD);
     cfg_postprocessing = pt->get<bool>(PATH_POST_PROCESS);
     cfg_fileStream = pt->get<std::string>(PATH_LADYBUG_STREAMFILE);
     cfg_panoramic = pt->get<bool>(PATH_PANO);

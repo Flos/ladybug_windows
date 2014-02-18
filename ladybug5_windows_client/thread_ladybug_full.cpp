@@ -1,10 +1,12 @@
 #include "thread_functions.h"
 #include "timing.h"
 
-int thread_ladybug_full(zmq::context_t* p_zmqcontext)
+int thread_ladybug_full()
 {
 _RESTART:
-	
+	zmq::context_t zmq_context(2);
+    boost::thread_group threads;
+    zmq::socket_t* socket = NULL;
 	double t_now = clock();	
 	unsigned int uiRawCols = 0;
 	unsigned int uiRawRows = 0;
@@ -13,6 +15,7 @@ _RESTART:
     LadybugContext context;
     std::string status;
     bool filestream = cfg_fileStream.size() > 0;
+    bool done = false;
  
     bool seperatedColors = false;
     unsigned int red_offset,green_offset,blue_offset;
@@ -39,7 +42,6 @@ _RESTART:
     //-----------------------------------------------
     // start
     //-----------------------------------------------
-	
 	status = "Create Ladybug context";
 	int retry = 10;
 
@@ -73,11 +75,9 @@ _RESTART:
         status = "start ladybug stream";
         error = ladybugCreateStreamContext( &streamContext);
         _HANDLE_ERROR
-	    
 
         error = ladybugInitializeStreamForReading( streamContext, cfg_fileStream.c_str() );
-        _HANDLE_ERROR
-	    
+        _HANDLE_ERROR 
 
         error = ladybugGetStreamNumOfImages( streamContext, &stream_image_count);
         _HANDLE_ERROR
@@ -141,12 +141,34 @@ _RESTART:
 	_TIME
 
     { 
-        status = "connect with zmq to " + cfg_ros_master;
-	    zmq::socket_t socket (*p_zmqcontext, ZMQ_PUB);
+        std::string connection;
+        int socket_type = ZMQ_PUB;
+        bool zmq_bind = false;
+
+        if( cfg_transfer_compressed && (cfg_postprocessing || cfg_panoramic)){
+            connection = zmq_uncompressed;
+            socket_type = ZMQ_PUSH;
+            zmq_bind = true;
+            for(unsigned int i=0; i < boost::thread::hardware_concurrency(); ++i){
+        	   threads.create_thread(std::bind(compressionThread, &zmq_context, i)); //worker thread (jpg-compression)
+            }
+            threads.create_thread(std::bind(sendingThread, &zmq_context));
+        }else{
+            connection = cfg_ros_master.c_str();
+        }
+
+        status = "connect with zmq to " + connection;
+
+	    socket = new zmq::socket_t(zmq_context, socket_type);
 	    int val = 6; //buffer size
-	    socket.setsockopt(ZMQ_RCVHWM, &val, sizeof(val));  //prevent buffer get overfilled
-	    socket.setsockopt(ZMQ_SNDHWM, &val, sizeof(val));  //prevent buffer get overfilled
-	    socket.connect (cfg_ros_master.c_str());
+	    socket->setsockopt(ZMQ_RCVHWM, &val, sizeof(val));  //prevent buffer get overfilled
+	    socket->setsockopt(ZMQ_SNDHWM, &val, sizeof(val));  //prevent buffer get overfilled
+        
+        if(zmq_bind){
+            socket->bind(connection.c_str());
+        }else{
+            socket->connect(connection.c_str());
+        }
 	    _TIME
 
 	    ladybug5_network::pbMessage message;
@@ -194,7 +216,7 @@ _RESTART:
 
         unsigned int nr = 0;
         double loopstart = t_now = clock();		
-        bool done = false;
+       
 	    while(!done)
 	    {
 		    try{
@@ -252,8 +274,8 @@ _RESTART:
 			        image_msg = message.add_images();
 			        image_msg->set_type((ladybug5_network::ImageType) ( 1 << uiCamera));
 			        image_msg->set_name(enumToString(image_msg->type()));
-			        image_msg->set_height(image.uiRows);
-                    image_msg->set_width(image.uiCols);
+			        image_msg->set_height(uiRawRows);
+                    image_msg->set_width(uiRawCols);
                     image_msg->set_allocated_distortion(&disortion[uiCamera]);
                     image_msg->set_allocated_position(&position[uiCamera]);
                     if(seperatedColors && !cfg_postprocessing){
@@ -274,32 +296,29 @@ _RESTART:
                     image_msg->set_packages(1);
                 }
 
-                pb_send(&socket, &message, ZMQ_SNDMORE);
+                pb_send(socket, &message, ZMQ_SNDMORE);
 
                 if(cfg_postprocessing || cfg_panoramic)
                 {
-			        status = "Convert images to 6 RGB buffers";
-			        // Convert the image to 6 RGB buffers
+			        status = "Convert images to 6 BGRU buffers";
+			        // Convert the image to 6 BGRU buffers
 			        error = ladybugConvertImage(context, &image, arpBuffers);
 			        _HANDLE_ERROR
 			        _TIME
-
-                    if(cfg_postprocessing)
-			        {
-                        int flag = ZMQ_SNDMORE;
-				        status = "Adding images with processing";
-				        for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
-				        {
-					        zmq::message_t raw_image(arpBufferSize);
-                            memcpy(raw_image.data(), arpBuffers[uiCamera], arpBufferSize);
+                    
+                    int flag = ZMQ_SNDMORE;
+				    status = "Adding images with processing";
+				    for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
+				    {
+					    zmq::message_t raw_image(arpBufferSize);
+                        memcpy(raw_image.data(), arpBuffers[uiCamera], arpBufferSize);
                            
-                            if( !cfg_panoramic && uiCamera == LADYBUG_NUM_CAMERAS-1 ){
-                               flag = 0;
-                            }
-                            socket.send(raw_image, flag ); // send RGB images
-				        }
-				        _TIME
-			        }
+                        if( !cfg_panoramic && uiCamera == LADYBUG_NUM_CAMERAS-1 ){
+                            flag = 0;
+                        }
+                        socket->send(raw_image, flag ); // send BGRU images
+				    }
+				    _TIME
 
                     if(cfg_panoramic){
                         ladybug5_network::pbImage* image_msg = 0;
@@ -323,51 +342,75 @@ _RESTART:
 				        _HANDLE_ERROR
 				        _TIME
 			
-				        status = "Add image to message";  
-                        zmq::message_t raw_image(arpBufferSize);
-                        memcpy(raw_image.data(), processedImage.pData, arpBufferSize);                    
-                        socket.send(raw_image, 0 ); // panoramic is the last image
+				        status = "Add image to message"; 
+                        unsigned int size = processedImage.uiCols*processedImage.uiRows*3;
+                        zmq::message_t raw_image(size);
+                        memcpy(raw_image.data(), processedImage.pData, size);                    
+                        socket->send(raw_image, 0 ); // panoramic is the last image
                         _TIME
 			        }
 			        status = "send img over network";
                     
                     _TIME
                 }else{ //No post processing, no panoramic picture
+                    if(seperatedColors){
                     
-                    status = "Stream: send image " + std::to_string(nr);
-                    int flag = ZMQ_SNDMORE;
+                        status = "send image " + std::to_string(nr);
+                        int flag = ZMQ_SNDMORE;
 
-                    for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
-                    {
-                        unsigned int index = uiCamera*4;
-                        //send images 
+                        for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
+                        {
+                            unsigned int index = uiCamera*4;
+                            //send images 
                      
-                        unsigned int r_size, g_size, b_size;
-                        char* r_data = NULL;
-                        char* g_data = NULL;
-                        char* b_data = NULL;
+                            unsigned int r_size, g_size, b_size;
+                            char* r_data = NULL;
+                            char* g_data = NULL;
+                            char* b_data = NULL;
 
-                        extractImageToMsg(&image, index+blue_offset,    &b_data, b_size);
-                        extractImageToMsg(&image, index+green_offset,   &g_data, g_size);
-                        extractImageToMsg(&image, index+red_offset,     &r_data, r_size);
+                            extractImageToMsg(&image, index+blue_offset,    &b_data, b_size);
+                            extractImageToMsg(&image, index+green_offset,   &g_data, g_size);
+                            extractImageToMsg(&image, index+red_offset,     &r_data, r_size);
 
-                        //RGB expected at reciever
-                        zmq::message_t R(r_size);
-                        memcpy(R.data(), r_data, r_size);
-                        socket.send(R, ZMQ_SNDMORE ); // Red = Index + 3
+                            //RGB expected at reciever
+                            zmq::message_t R(r_size);
+                            memcpy(R.data(), r_data, r_size);
+                            socket->send(R, ZMQ_SNDMORE ); // Red = Index + 3
 
-                        zmq::message_t G(g_size);
-                        memcpy(G.data(), g_data, g_size);
-                        socket.send(G, ZMQ_SNDMORE ); // Green = Index + 1 || 2
+                            zmq::message_t G(g_size);
+                            memcpy(G.data(), g_data, g_size);
+                            socket->send(G, ZMQ_SNDMORE ); // Green = Index + 1 || 2
 
-                        zmq::message_t B(b_size);     // Blue = Index 0
-                        memcpy(B.data(), b_data, b_size);
+                            zmq::message_t B(b_size);     // Blue = Index 0
+                            memcpy(B.data(), b_data, b_size);
 
-                        if( uiCamera == LADYBUG_NUM_CAMERAS-1 ){
-                           flag = 0;
+                            if( uiCamera == LADYBUG_NUM_CAMERAS-1 ){
+                               flag = 0;
+                            }
+                            socket->send(B, flag );
                         }
-                        socket.send(B, flag );
-		            }
+                    }else{
+                        // send RAW BGGR images
+                         status = "send image " + std::to_string(nr);
+                        int flag = ZMQ_SNDMORE;
+
+                        for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
+                        {     
+                            unsigned int image_size;
+                            char* image_data = NULL;
+
+                            extractImageToMsg(&image, uiCamera,    &image_data, image_size);
+
+                            //RGB expected at reciever
+                            zmq::message_t image_msg(image_size);
+                            memcpy(image_msg.data(), image_data, image_size);
+
+                            if( uiCamera == LADYBUG_NUM_CAMERAS-1 ){
+                               flag = 0;
+                            }
+                            socket->send(image_msg, flag );
+                        }
+                    }	            
                 }
 
                 message.Clear();
@@ -403,9 +446,16 @@ _EXIT:
 	//
 	ladybugStop( context );
 	ladybugDestroyContext( &context );
+    if(filestream)
+    {
+        ladybugDestroyStreamContext (&streamContext);
+    }
 
 	google::protobuf::ShutdownProtobufLibrary();
-	//socket.close();
+    if(socket != NULL){
+        socket->close();
+        delete socket;
+    }
 	
 	for( int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ ){
 		if ( arpBuffers[ uiCamera ] != NULL )
@@ -413,7 +463,12 @@ _EXIT:
 			delete  [] arpBuffers[ uiCamera ];
 		}
 	}
+    if(done){
+       return 1;
+    }
+    printf("\nWating 5 sec...\n");
+    Sleep(5000);
+    threads.interrupt_all();
+    
 	goto _RESTART;
-
-	return 1;
 }
