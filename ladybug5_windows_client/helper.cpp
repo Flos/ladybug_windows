@@ -71,13 +71,8 @@ zmq::message_t compressImageToZmqMsg(ladybug5_network::pbMessage *message, zmq::
     zmq::message_t img_out(img_Size);
     memcpy(img_out.data(), _compressedImage, img_Size);
 
-	//message->clear_images();
-	ladybug5_network::pbImage* img_msg =(ladybug5_network::pbImage*) &message->images(i);
-	img_msg->set_image(_compressedImage, img_Size);
-	img_msg->set_size(img_Size);
-
 	tjFree(_compressedImage);
-    _TIME
+    //_TIME
     return img_out;
 }
 

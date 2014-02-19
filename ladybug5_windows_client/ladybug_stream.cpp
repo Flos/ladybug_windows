@@ -92,13 +92,15 @@ void extractImageToMsg(LadybugImage* image, unsigned int i, char** begin, unsign
         return;
     }
     else{
+        //for 8 bit only BGGR
         int colorChannels = 4;
-        unsigned int resolution = image->uiFullCols* image->uiFullRows;
-        unsigned int dataDepth = getDataBitDepth(image);
-       
-        unsigned int imageSize = (resolution*dataDepth*colorChannels)/8;
-        *begin = (char*)&image->pData[i*imageSize];
-        size =  imageSize;
+        unsigned int resolution = image->uiFullCols*image->uiFullRows;
+        unsigned int imagesize = 4*resolution;
+        unsigned int offset = imagesize*i;
+        //unsigned int dataDepth = getDataBitDepth(image);
+
+        *begin = (char*)&image->pData[i*resolution];
+        size =  imagesize;
         return;
     }    
 }

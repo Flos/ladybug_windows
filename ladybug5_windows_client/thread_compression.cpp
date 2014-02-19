@@ -40,17 +40,17 @@ void compressionThread(zmq::context_t* p_zmqcontext, int i)
             printf("compression recieved image: %i more: %i\n", numImages, more, more_size);
         }
         while(more);
-        _TIME
+        //_TIME
 
 	    status = "compresseionThread compress jpg";
-        zmq::message_t* buffer[max_nr_images];
+        zmq::message_t buffer[max_nr_images];
         for(int i=0 ; i < numImages; ++i){
             if( i < max_nr_images-1){
-                buffer[i] = &compressImageToZmqMsg(&pb_msg, &arpBuffer[i], i, TJPF_BGRA);
+                buffer[i] = compressImageToZmqMsg(&pb_msg, &arpBuffer[i], i, TJPF_RGBA); // TJPF_BGRA
             }
             else{
                  /* panramic image is BGR not BGRA, last image is the panoramic*/
-                buffer[i] = &compressImageToZmqMsg(&pb_msg, &arpBuffer[i], i, TJPF_BGR);
+                buffer[i] = compressImageToZmqMsg(&pb_msg, &arpBuffer[i], i, TJPF_RGB);
             }  
         }
 		
