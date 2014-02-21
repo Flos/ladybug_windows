@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="configuration_helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="timing.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_compression.cpp">
+      <Filter>threads</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_sending.cpp">
+      <Filter>threads</Filter>
+    </ClCompile>
+    <ClCompile Include="protobuf\imageMessage.pb.cc">
+      <Filter>protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="ladybug_stream.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="protobuf_helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_ladybug_full.cpp">
+      <Filter>threads</Filter>
+    </ClCompile>
+    <ClCompile Include="ladybug_helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="helper">
+      <UniqueIdentifier>{e92c95e1-25e5-4f8b-b18e-07833a70072e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="threads">
+      <UniqueIdentifier>{3a8680de-4c17-4dcc-8771-f5382922c3ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protobuf">
+      <UniqueIdentifier>{d505ac08-ed0a-4890-950b-3e0cb311afdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header">
+      <UniqueIdentifier>{0ca2853e-6f28-4bcb-b0c0-58d0fca834fb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\client.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\configuration_helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ladybug_helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ladybug_stream.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\protobuf_helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Resource.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\socket.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\thread_functions.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\timing.h">
+      <Filter>header</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

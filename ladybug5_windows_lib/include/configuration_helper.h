@@ -73,5 +73,6 @@ extern const lex_type ladybugAutoExposureModeMap;
 void printTree (boost::property_tree::ptree &pt, int level);
 void createDefaultIni(boost::property_tree::ptree *pt);
 void loadConfigsFromPtree(boost::property_tree::ptree *pt);
+void createOptionsFile();
 void initConfig(int argc, char* argv[]);
 
