@@ -27,7 +27,9 @@ void sendingThread(zmq::context_t* p_zmqcontext){
 		zmq::message_t in1;
         socket_in.recv(&in1);
         socket_in.getsockopt(ZMQ_RCVMORE, &more, &more_size);
+#ifdef _DEBUG
         std::cout << "SendingThread: Recieved message with size:" << in1.size() << std::endl;
+#endif
         _TIME
         status = "SendingThread: Send message";
         socket_out.send(in1, more? ZMQ_SNDMORE: 0);  

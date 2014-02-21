@@ -131,7 +131,7 @@ _RESTART:
     }
 
      seperatedColors = isColorSeperated(&image);
-     if(seperatedColors){
+     if(seperatedColors || !cfg_transfer_compressed){
          getColorOffset(&image, red_offset, green_offset, blue_offset);
      }
 	_TIME
@@ -214,13 +214,15 @@ _RESTART:
         unsigned int nr = 0;
         double loopstart = t_now = clock();		
        
+        printf("Running...\n");
+
 	    while(!done)
 	    {
 		    try{
 			    loopstart = t_now = clock();
 			    t_now = loopstart;
 
-			    printf("\nGrab Image loop...\n");
+
 			    // Grab an image from the camera
 			    std::string status = "grab image";
 
@@ -237,7 +239,7 @@ _RESTART:
                 message.set_name("windows");
 			    message.set_camera("ladybug5");
                 message.set_id(nr);
-                message.set_serial_number(std::to_string(info.serialBase).c_str);
+                message.set_serial_number(std::to_string(info.serialBase));
 
                 /* read the sensor data */        
                 accelerometer.set_x(image.imageHeader.accelerometer.x);
@@ -386,11 +388,12 @@ _RESTART:
                         }else{ /* RGGB RAW */
                             assert(r_size == g_size);
                             assert(r_size == b_size);
-                            zmq::message_t image(r_size*3);
-                            memcpy(image.data(), r_data, r_size);
-                            memcpy((char*)image.data()+r_size, g_data, g_size);
-                            memcpy((char*)image.data()+r_size*2, b_data, b_size);
-                            socket->send(image, flag );
+                            //zmq::message_t image(r_size);
+                            //memcpy(image.data(), r_data, r_size);
+                          /*  memcpy((char*)image.data()+r_size, r_data, g_size);
+                            memcpy((char*)image.data()+r_size*2, r_data, b_size);*/
+                            //socket->send(image, flag );
+                            throw new std::exception("RGB8 uncompressed not supported");
                         }          
                     }
                 }

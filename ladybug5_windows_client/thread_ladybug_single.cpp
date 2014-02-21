@@ -108,14 +108,14 @@ _RESTART:
         ladybug5_network::LadybugTimeStamp msg_timestamp;
         unsigned int nr = 0;
         double loopstart = t_now = clock();		
-
+        printf("Running...\n");
+ 
 	    while(true)
 	    {
 		    try{
 			    loopstart = t_now = clock();
 			    t_now = loopstart;
 
-			    printf("\nGrab Image loop...\n");
 			    // Grab an image from the camera
 			    std::string status = "grab image";
 			    //LadybugImage image;

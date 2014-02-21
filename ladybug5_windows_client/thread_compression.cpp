@@ -5,8 +5,9 @@ void compressionThread(zmq::context_t* p_zmqcontext, int i)
 {	
     std::string status = "CompressionThread";
     double t_now = clock();
+#ifdef _DEBUG
 	printf("Compression Thread%i: in: %s out: %s\n", i, zmq_uncompressed, zmq_compressed);
-
+#endif
     zmq::socket_t socket_in(*p_zmqcontext, ZMQ_PULL);
     int val = 2; //buffer size
 	socket_in.setsockopt(ZMQ_RCVHWM, &val, sizeof(val));  //prevent buffer get overfilled
@@ -37,7 +38,9 @@ void compressionThread(zmq::context_t* p_zmqcontext, int i)
             socket_in.recv(&arpBuffer[numImages]);
             socket_in.getsockopt(ZMQ_RCVMORE, &more, &more_size);
              ++numImages;
+#ifdef _DEBUG
             printf("compression recieved image: %i more: %i\n", numImages, more, more_size);
+#endif
         }
         while(more);
         //_TIME
