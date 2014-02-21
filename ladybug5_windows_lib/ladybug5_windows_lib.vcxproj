@@ -245,6 +245,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="myLadybug.cpp" />
     <ClCompile Include="ladybug_helper.cpp" />
     <ClCompile Include="ladybug_stream.cpp" />
     <ClCompile Include="protobuf_helper.cpp" />
@@ -267,6 +268,7 @@
     <ClInclude Include="include\socket.h" />
     <ClInclude Include="include\thread_functions.h" />
     <ClInclude Include="include\timing.h" />
+    <ClInclude Include="myLadybug.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

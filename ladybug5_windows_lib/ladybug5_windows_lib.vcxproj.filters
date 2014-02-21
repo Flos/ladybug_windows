@@ -31,6 +31,9 @@
     <ClCompile Include="helper.cpp">
       <Filter>helper</Filter>
     </ClCompile>
+    <ClCompile Include="myLadybug.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="helper">
@@ -75,6 +78,9 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="include\timing.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="myLadybug.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
