@@ -193,7 +193,7 @@ _RESTART:
             error = ladybugGetCameraUnitFocalLength(context, uiCamera, &focal_lenght);
             _HANDLE_ERROR
 
-            double centerX,centerY;
+            double centerX, centerY;
             error = ladybugGetCameraUnitImageCenter(context , uiCamera, &centerX, &centerY);
             _HANDLE_ERROR
 

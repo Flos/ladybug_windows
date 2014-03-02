@@ -34,6 +34,9 @@
     <ClCompile Include="myLadybug.cpp">
       <Filter>helper</Filter>
     </ClCompile>
+    <ClCompile Include="configuration.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="helper">
@@ -80,7 +83,10 @@
     <ClInclude Include="include\timing.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="myLadybug.h">
+    <ClInclude Include="include\configuration.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\myLadybug.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>

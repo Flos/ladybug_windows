@@ -11,6 +11,7 @@ const char* PATH_LADYBUG_STREAMFILE    =   "Input.Filestream";
 const char* PATH_PANO       =   "Processing.CreatePanoramic";  
 const char* PATH_PANO_WIDTH =   "Processing.PanoWidth";
 const char* PATH_PANO_HIGHT =   "Processing.PanoHeight";
+const char* PATH_RECTIFICATION = "Processing.Rectification";
 const char* PATH_COLOR_PROCESSING = "Processing.ColorProcessing";
 const char* PATH_LB_DATA    =   "Capture.Dataformat";
 const char* PATH_EXPOSURE   =   "Capture.ExposureMode";

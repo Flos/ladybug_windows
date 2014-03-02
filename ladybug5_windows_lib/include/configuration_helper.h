@@ -55,6 +55,7 @@ extern const char* PATH_COLOR_PROCESSING;
 extern const char* PATH_LB_DATA;
 extern const char* PATH_EXPOSURE;
 extern const char* PATH_SHUTTER;
+extern const char* PATH_RECTIFICATION;
 
 /* typedefs for enum to string */
 typedef boost::bimap< LadybugDataFormat, std::string > ldf_type;
@@ -75,4 +76,3 @@ void createDefaultIni(boost::property_tree::ptree *pt);
 void loadConfigsFromPtree(boost::property_tree::ptree *pt);
 void createOptionsFile();
 void initConfig(int argc, char* argv[]);
-
