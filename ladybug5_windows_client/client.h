@@ -20,6 +20,7 @@
 #include "time.h"
 #include "zhelpers.h"
 #include <locale.h>
+#include <WinBase.h>
 
 //
 // Includes

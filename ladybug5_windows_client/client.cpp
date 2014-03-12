@@ -2,7 +2,7 @@
 #include "client.h"
 
 void main( int argc, char* argv[] ){
-
+    SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED);
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     initConfig(argc, argv);
     std::cout << std::endl << "Number of Cores: " << boost::thread::hardware_concurrency() << std::endl;  
