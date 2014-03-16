@@ -1,16 +1,16 @@
 // ladybug5_lut_export.cpp : Definiert den Einstiegspunkt für die Konsolenanwendung.
 //
 
-#include "timing.h"
+
 //
 // Includes
 //
-#include "helper.h"
+#include "timing.h"
 #include "configuration_helper.h"
-#include "thread_functions.h"
 #include "myLadybug.h"
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <Windows.h>
 #include <WinBase.h>
 
 bool show_images = false;
@@ -65,7 +65,7 @@ void main( int argc, char* argv[] ){
     std::string status = "Init";
     double t_now = clock();
     initConfig(argc, argv);
-    std::cout << std::endl << "Number of Cores: " << boost::thread::hardware_concurrency() << std::endl;  
+    //std::cout << std::endl << "Number of Cores: " << boost::thread::hardware_concurrency() << std::endl;  
     printf("\nWating 5 sec...\n");
     //Sleep(5000); 
     Configuration config;

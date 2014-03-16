@@ -56,46 +56,49 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\client.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="include\configuration_helper.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="include\helper.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ladybug_helper.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ladybug_stream.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="include\protobuf_helper.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Resource.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="include\socket.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="include\thread_functions.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="include\timing.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="include\configuration.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="include\myLadybug.h">
-      <Filter>header</Filter>
-    </ClInclude>
     <ClInclude Include="..\protobuf\imageMessage.pb.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="include\grabSend.h">
+    <ClInclude Include="..\include\client.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\configuration.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\configuration_helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\grabSend.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ladybug_helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ladybug_stream.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\myLadybug.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\protobuf_helper.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Resource.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\socket.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\thread_functions.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\timing.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\error.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>

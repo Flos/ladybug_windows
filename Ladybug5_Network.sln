@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ladybug5_windows_client", "ladybug5_windows_client\ladybug5_windows_client.vcxproj", "{6A3F953F-36C8-4F12-80A7-172064C14E76}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "grabber", "grabber\grabber.vcxproj", "{6A3F953F-36C8-4F12-80A7-172064C14E76}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "export_lookupTable", "ladybug5_lut_export\ladybug5_lut_export.vcxproj", "{44AE8AF6-A26F-4348-AB13-6A706A74E3D2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "export_lookupTable", "export_lookupTable\ladybug5_lut_export.vcxproj", "{44AE8AF6-A26F-4348-AB13-6A706A74E3D2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ladybug5_windows_lib", "ladybug5_windows_lib\ladybug5_windows_lib.vcxproj", "{FEC44DD5-2990-4206-AD6C-09ADF0E828E8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ladybug5_lib", "ladybug5_lib\ladybug5_windows_lib.vcxproj", "{FEC44DD5-2990-4206-AD6C-09ADF0E828E8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "export_distCoeffs", "export_distCoeffs\export_distCoeffs.vcxproj", "{7D8136FE-754F-4235-9269-E3B6077A4EE4}"
 	ProjectSection(ProjectDependencies) = postProject

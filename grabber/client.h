@@ -18,7 +18,6 @@
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "zmq.hpp"
 #include "time.h"
-#include "zhelpers.h"
 #include <locale.h>
 #include <WinBase.h>
 
@@ -28,4 +27,3 @@
 #include "helper.h"
 #include "configuration_helper.h"
 #include "thread_functions.h"
-

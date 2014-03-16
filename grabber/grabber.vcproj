@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="ladybug5_windows_client"
+	Name="grabber"
 	ProjectGUID="{6A3F953F-36C8-4F12-80A7-172064C14E76}"
-	RootNamespace="ladybug5_windows_client"
+	RootNamespace="grabber"
 	>
 	<Platforms>
 		<Platform
@@ -41,7 +41,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release/ladybug5_windows_client.tlb"
+				TypeLibraryName=".\Release/grabber.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -53,7 +53,7 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/ladybug5_windows_client.pch"
+				PrecompiledHeaderFile=".\Release/grabber.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="0"
@@ -130,7 +130,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\Release/ladybug5_windows_client.tlb"
+				TypeLibraryName=".\Release/grabber.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -142,7 +142,7 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\x64\Release/ladybug5_windows_client.pch"
+				PrecompiledHeaderFile=".\x64\Release/grabber.pch"
 				AssemblerListingLocation=".\x64\Release/"
 				ObjectFile=".\x64\Release/"
 				ProgramDataBaseFileName=".\x64\Release/"
@@ -222,7 +222,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug/ladybug5_windows_client.tlb"
+				TypeLibraryName=".\Debug/grabber.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -232,7 +232,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				PrecompiledHeaderFile=".\Debug/ladybug5_windows_client.pch"
+				PrecompiledHeaderFile=".\Debug/grabber.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -311,7 +311,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\Debug/ladybug5_windows_client.tlb"
+				TypeLibraryName=".\Debug/grabber.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -321,7 +321,7 @@
 				PreprocessorDefinitions="WIN64;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				PrecompiledHeaderFile=".\x64\Debug/ladybug5_windows_client.pch"
+				PrecompiledHeaderFile=".\x64\Debug/grabber.pch"
 				AssemblerListingLocation=".\x64\Debug/"
 				ObjectFile=".\x64\Debug/"
 				ProgramDataBaseFileName=".\x64\Debug/"
@@ -388,7 +388,7 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="ladybug5_windows_client.cpp"
+				RelativePath="grabber.cpp"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
@@ -438,7 +438,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\ladybug5_windows_client.rc"
+				RelativePath=".\grabber.rc"
 				>
 			</File>
 		</Filter>

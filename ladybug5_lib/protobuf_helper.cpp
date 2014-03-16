@@ -1,15 +1,25 @@
-#include "timing.h"
+#include "protobuf_helper.h"
 
-double time_diff(std::string status, double start, std::string name){
-	double t_now = clock();
-	//printf("%s : %f \n", s, seconds);
-#ifdef _DEBUG
-    printf("%f\t %s\t to pass %s\n", (t_now-start)/CLOCKS_PER_SEC,  name.c_str(), status.c_str());
-#endif // !debug
-
-  
-	return t_now;
+bool pb_send(zmq::socket_t* socket, const ladybug5_network::pbMessage* pb_message, int flag){
+	// serialize the request to a string
+	std::string pb_serialized;
+	pb_message->SerializeToString(&pb_serialized);
+    
+	// create and send the zmq message
+	zmq::message_t request (pb_serialized.size());
+	memcpy ((void *) request.data (), pb_serialized.c_str(), pb_serialized.size());
+	return socket->send(request, flag);
 }
+
+bool pb_recv(zmq::socket_t* socket, ladybug5_network::pbMessage* pb_message){
+	
+	zmq::message_t zmq_msg;
+	bool result = socket->recv(&zmq_msg);
+	pb_message->ParseFromArray(zmq_msg.data(), zmq_msg.size());
+	return result;
+}
+
+
 
 std::string enumToString(ladybug5_network::ImageType type){
 	switch (type){

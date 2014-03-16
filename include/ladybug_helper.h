@@ -5,6 +5,7 @@
 #include "configuration_helper.h"
 #include "timing.h"
 #include <locale.h>
+#include "error.h"
 
 LadybugError initCamera( LadybugContext context);
 LadybugError configureLadybugForPanoramic(LadybugContext context);

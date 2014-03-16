@@ -75,13 +75,15 @@
     <OutDir>..\..\bin\</OutDir>
     <IntDir>.\Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>../include;../protobuf;C:\local\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
+    <LibraryPath />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-    <IncludePath>C:\work\ladybug_network-windows_client\ladybug5_windows_lib\include;C:\local\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;C:\work\ladybug_network-windows_client\protobuf;$(IncludePath)</IncludePath>
+    <IncludePath>../include;../protobuf;C:\local\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -95,7 +97,7 @@
     <OutDir>..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\work\ladybug_network-windows_client\protobuf;C:\work\ladybug_network-windows_client\ladybug5_windows_lib\include;C:\local\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath);C:\Program Files %28x86%29\Visual Leak Detector\include</IncludePath>
+    <IncludePath>../include;../protobuf;C:\local\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
     <LibraryPath>$(LibraryPath);C:\Program Files %28x86%29\Visual Leak Detector\lib\Win64</LibraryPath>
   </PropertyGroup>
@@ -245,7 +247,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="client.cpp">
+    <ClCompile Include="full_processing.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
@@ -262,19 +264,14 @@
     <ResourceCompile Include="client.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="client.h" />
+    <ClInclude Include="full_processing.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\icons\PtGreyExample.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ladybug5_windows_lib\ladybug5_windows_lib.vcxproj">
+    <ProjectReference Include="..\ladybug5_lib\ladybug5_windows_lib.vcxproj">
       <Project>{fec44dd5-2990-4206-ad6c-09adf0e828e8}</Project>
-      <Private>true</Private>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

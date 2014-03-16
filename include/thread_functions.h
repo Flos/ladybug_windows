@@ -18,6 +18,7 @@
 #include "protobuf_helper.h"
 #include <boost/thread.hpp>
 #include "myLadybug.h"
+#include "error.h"
 
 /*Threads*/
 void ladybugThread(zmq::context_t* p_zmqcontext, std::string imageReciever);
