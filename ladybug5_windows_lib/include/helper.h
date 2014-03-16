@@ -1,7 +1,7 @@
 #pragma once
 #include "timing.h"
 #include "turbojpeg.h"
-#include "protobuf/imageMessage.pb.h"
+#include "imageMessage.pb.h"
 #include "zmq.hpp"
 #include <iostream>
 #include <fstream>

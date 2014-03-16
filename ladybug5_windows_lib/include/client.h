@@ -13,7 +13,7 @@
 //=============================================================================
 #include <boost/thread.hpp>
 #include <assert.h>
-#include "protobuf/imageMessage.pb.h"
+#include "imageMessage.pb.h"
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "zmq.hpp"

@@ -5,7 +5,7 @@
 #include <time.h>
 #include <string>
 #include <ladybug.h>
-#include "protobuf\imageMessage.pb.h"
+#include "imageMessage.pb.h"
 
 #ifndef _TIME
 #define _TIME \
@@ -25,6 +25,16 @@ std::string enumToString(ladybug5_network::ImageType type);
 	{ \
 	printf( "Error! While %s. Ladybug library reported %s\n", status.c_str(), \
 	::ladybugErrorToString( error ) ); \
+	printf( "\n\n\nRestarting...\n\n\n");\
+	Sleep(500);\
+	goto _EXIT; \
+	}
+
+#define _HANDLE_ERROR_LADY \
+	if( lady->error != LADYBUG_OK ) \
+	{ \
+	printf( "Error! While %s. Ladybug library reported %s\n", status.c_str(), \
+	::ladybugErrorToString( lady->error ) ); \
 	printf( "\n\n\nRestarting...\n\n\n");\
 	Sleep(500);\
 	goto _EXIT; \

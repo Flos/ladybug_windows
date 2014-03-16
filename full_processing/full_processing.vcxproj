@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{FEC44DD5-2990-4206-AD6C-09ADF0E828E8}</ProjectGuid>
-    <RootNamespace>ladybug5_windows_client</RootNamespace>
-    <ProjectName>ladybug5_windows_lib</ProjectName>
+    <ProjectGuid>{D51C0A54-ED5E-475F-A400-C205B19184D3}</ProjectGuid>
+    <RootNamespace>full_processing</RootNamespace>
+    <ProjectName>full_processing</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -37,13 +37,13 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v110</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v110</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
@@ -81,7 +81,8 @@
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-    <IncludePath>include;C:\work\ladybug_network-windows_client\protobuf;C:\work\zguide\examples\C;C:\local\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\work\ladybug_network-windows_client\ladybug5_windows_lib\include;C:\local\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;C:\work\ladybug_network-windows_client\protobuf;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>bin\</OutDir>
@@ -94,13 +95,13 @@
     <OutDir>..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\work\ladybug_network-windows_client\protobuf;C:\work\ladybug_network-windows_client\ladybug5_windows_lib\include;C:\work\zguide\examples\C;C:\local\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath);C:\Program Files %28x86%29\Visual Leak Detector\include</IncludePath>
+    <IncludePath>C:\work\ladybug_network-windows_client\protobuf;C:\work\ladybug_network-windows_client\ladybug5_windows_lib\include;C:\local\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath);C:\Program Files %28x86%29\Visual Leak Detector\include</IncludePath>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
     <LibraryPath>$(LibraryPath);C:\Program Files %28x86%29\Visual Leak Detector\lib\Win64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
-      <TypeLibraryName>.\Release/ladybug5_windows_client.tlb</TypeLibraryName>
+      <TypeLibraryName>.\Release/full_processing.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
@@ -110,7 +111,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>.\Release/ladybug5_windows_client.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\Release/full_processing.pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <CompileAs>Default</CompileAs>
@@ -132,7 +133,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
       <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>.\Release/ladybug5_windows_client.tlb</TypeLibraryName>
+      <TypeLibraryName>.\Release/full_processing.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
@@ -142,7 +143,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>.\x64\Release/ladybug5_windows_client.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\x64\Release/full_processing.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\x64\Release/</AssemblerListingLocation>
       <ObjectFileName>.\x64\Release/</ObjectFileName>
       <ProgramDataBaseFileName>.\x64\Release/</ProgramDataBaseFileName>
@@ -172,7 +173,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
-      <TypeLibraryName>.\Debug/ladybug5_windows_client.tlb</TypeLibraryName>
+      <TypeLibraryName>.\Debug/full_processing.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
@@ -180,7 +181,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>.\Debug/ladybug5_windows_client.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\Debug/full_processing.pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -207,7 +208,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
       <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>.\Debug/ladybug5_windows_client.tlb</TypeLibraryName>
+      <TypeLibraryName>.\Debug/full_processing.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
@@ -215,8 +216,7 @@
       <PreprocessorDefinitions>WIN64;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>
-      </PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\x64\Debug/full_processing.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\x64\Debug/</AssemblerListingLocation>
       <ObjectFileName>.\x64\Debug/</ObjectFileName>
       <ProgramDataBaseFileName>.\x64\Debug/</ProgramDataBaseFileName>
@@ -225,14 +225,14 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OpenMPSupport>true</OpenMPSupport>
+      <OpenMPSupport>false</OpenMPSupport>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <OutputFile>../bin/$(ProjectName)_$(Platform)_$(Configuration).dll</OutputFile>
+      <OutputFile>../bin/$(ProjectName)_$(Platform)_$(Configuration).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -245,36 +245,37 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\protobuf\imageMessage.pb.cc" />
-    <ClCompile Include="configuration.cpp" />
-    <ClCompile Include="myLadybug.cpp" />
-    <ClCompile Include="ladybug_helper.cpp" />
-    <ClCompile Include="ladybug_stream.cpp" />
-    <ClCompile Include="protobuf_helper.cpp" />
-    <ClCompile Include="thread_ladybug.cpp" />
-    <ClCompile Include="thread_ladybug_full.cpp" />
-    <ClCompile Include="grabSend.cpp" />
-    <ClCompile Include="thread_sending.cpp" />
-    <ClCompile Include="helper.cpp" />
-    <ClCompile Include="configuration_helper.cpp" />
-    <ClCompile Include="thread_compression.cpp" />
-    <ClCompile Include="timing.cpp" />
+    <ClCompile Include="client.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BrowseInformation>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BrowseInformation>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\protobuf\imageMessage.pb.h" />
-    <ClInclude Include="include\client.h" />
-    <ClInclude Include="include\configuration.h" />
-    <ClInclude Include="include\configuration_helper.h" />
-    <ClInclude Include="include\grabSend.h" />
-    <ClInclude Include="include\helper.h" />
-    <ClInclude Include="include\ladybug_helper.h" />
-    <ClInclude Include="include\ladybug_stream.h" />
-    <ClInclude Include="include\myLadybug.h" />
-    <ClInclude Include="include\protobuf_helper.h" />
-    <ClInclude Include="include\Resource.h" />
-    <ClInclude Include="include\socket.h" />
-    <ClInclude Include="include\thread_functions.h" />
-    <ClInclude Include="include\timing.h" />
+    <ResourceCompile Include="client.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="client.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\icons\PtGreyExample.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ladybug5_windows_lib\ladybug5_windows_lib.vcxproj">
+      <Project>{fec44dd5-2990-4206-ad6c-09adf0e828e8}</Project>
+      <Private>true</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

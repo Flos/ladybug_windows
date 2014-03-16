@@ -81,7 +81,7 @@
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-    <IncludePath>C:\work\ladybug_network-windows_client\ladybug5_windows_lib\include;C:\local\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\work\ladybug_network-windows_client\ladybug5_windows_lib\include;C:\local\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;C:\work\ladybug_network-windows_client\protobuf;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -95,7 +95,7 @@
     <OutDir>..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\work\ladybug_network-windows_client\ladybug5_windows_lib\include;C:\local\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath);C:\Program Files %28x86%29\Visual Leak Detector\include</IncludePath>
+    <IncludePath>C:\work\ladybug_network-windows_client\protobuf;C:\work\ladybug_network-windows_client\ladybug5_windows_lib\include;C:\local\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath);C:\Program Files %28x86%29\Visual Leak Detector\include</IncludePath>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
     <LibraryPath>$(LibraryPath);C:\Program Files %28x86%29\Visual Leak Detector\lib\Win64</LibraryPath>
   </PropertyGroup>

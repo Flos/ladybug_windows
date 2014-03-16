@@ -23,6 +23,7 @@
 	{ \
 	printf( "Error! Ladybug library reported %s\n", \
 	::ladybugErrorToString( error ) );\
+    throw new std::exception(::ladybugErrorToString( error ));\
     }
 #endif
 
@@ -73,13 +74,16 @@ public:
     LadybugError getCameraCalibration(unsigned int camera_index, CameraCalibration* calibration);
     ArpBuffer* getBuffer();
     LadybugContext context;
+    LadybugError error;
+    bool isFileStream();
+    double getCycleTime();
 private:
     void init();
     LadybugStream* _stream;
     ArpBuffer* _buffer;
     LadybugImage _raw_image;
     bool images_processed;
-    LadybugError error;
+    bool initialised_processing;
     LadybugError start();
     LadybugError initCamera();
     LadybugError Ladybug::initStream(std::string path_streamfile);

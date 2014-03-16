@@ -1,154 +1,46 @@
 #include "thread_functions.h"
 #include "timing.h"
 
-int thread_ladybug_full(zmq::context_t* zmq_context)
+int thread_ladybug()
 {
 _RESTART:
+	zmq::context_t zmq_context(2);
     boost::thread_group threads;
     zmq::socket_t* socket = NULL;
-    zmq::socket_t* socket_watchdog = NULL;
 	double t_now = clock();	
 	unsigned int uiRawCols = 0;
 	unsigned int uiRawRows = 0;
     LadybugError error;
     LadybugImage image;
-    LadybugContext context;
+    
+    Ladybug* lady = NULL;
+    while(true){
+        if(lady != NULL && lady->error != LADYBUG_OK){
+            delete lady;
+            lady = NULL;
+        }
+        if(lady == NULL){
+            lady = new Ladybug();
+        }
+    
+
     std::string status;
-    bool filestream = cfg_fileStream.size() > 0;
+    bool filestream = lady->config->cfg_fileStream.size() > 0;
     bool done = false;
  
     bool seperatedColors = false;
     unsigned int red_offset,green_offset,blue_offset;
 
     //-----------------------------------------------
-    //create watchdog
-    //-----------------------------------------------
-    int val_watchdog = 1;
-    socket_watchdog = new zmq::socket_t(*zmq_context, ZMQ_PUSH);
-	socket_watchdog->setsockopt(ZMQ_RCVHWM, &val_watchdog, sizeof(val_watchdog));  //prevent buffer get overfilled
-	socket_watchdog->setsockopt(ZMQ_SNDHWM, &val_watchdog, sizeof(val_watchdog));
-    socket_watchdog->connect("inproc://watchdog");
-    zmq::message_t msg_watchdog;
-    socket_watchdog->send(msg_watchdog);
-
-    //-----------------------------------------------
-    // only on for if processing is enabled
-    //-----------------------------------------------
-    unsigned int arpBufferSize = 0;
-	unsigned char* arpBuffers[ LADYBUG_NUM_CAMERAS ];
-    for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
-	{
-		arpBuffers[ uiCamera ] = NULL;
-	}
-
-    //-----------------------------------------------
     // only for filestream mode
     //-----------------------------------------------
     unsigned int sleepTime = 0;
-    LadybugStreamContext streamContext;
-    LadybugStreamHeadInfo streamHeadInfo;
-    unsigned int stream_image_count;
-    unsigned int frame_image_count;
-
-    //-----------------------------------------------
-    // start
-    //-----------------------------------------------
-	status = "Create Ladybug context";
-	int retry = 10;
-
-	// create ladybug context
-	error = ladybugCreateContext( &context );
-	_HANDLE_ERROR
-	_TIME
-	status = "Initialize the camera";
-
-    if( !filestream ){ // filestream is empty start live cam
-	    // Initialize  the camera
-	    error = initCamera(context);
-	    _HANDLE_ERROR
-	    _TIME
-
-        status = "start ladybug live";
-	    error = startLadybug(context);
-	    _HANDLE_ERROR
-	    _TIME
-	
-	    // Grab an image to inspect the image size
-	    status = "Grab an image to inspect the image size";
-	    error = LADYBUG_FAILED;
-	    while ( error != LADYBUG_OK && retry-- > 0)	{
-		    error = ladybugGrabImage( context, &image ); 
-	    }
-	    _HANDLE_ERROR
-	    _TIME
-    }
-    else{
-        status = "start ladybug stream";
-        error = ladybugCreateStreamContext( &streamContext);
-        _HANDLE_ERROR
-
-        error = ladybugInitializeStreamForReading( streamContext, cfg_fileStream.c_str() );
-        _HANDLE_ERROR 
-
-        error = ladybugGetStreamNumOfImages( streamContext, &stream_image_count);
-        _HANDLE_ERROR
-	    
-        error = ladybugGetStreamHeader( streamContext, &streamHeadInfo);
-        _HANDLE_ERROR
-
-        error = ladybugReadImageFromStream( streamContext, &image);
-        _HANDLE_ERROR
-        
-        frame_image_count = getImageCount(&image);
-        sleepTime = (1000 - (streamHeadInfo.frameRate * 15)) / streamHeadInfo.frameRate;
-        std::string stream_configfile = "filestream.cfg";
-        error = ladybugGetStreamConfigFile( streamContext , stream_configfile.c_str() );
-        _HANDLE_ERROR
-        //
-        // Load configuration file
-        //
-        error = ladybugLoadConfig( context, stream_configfile.c_str() );
-        _HANDLE_ERROR
-      }
-
-	status = "configure for panoramic stitching";
-	error = configureLadybugForPanoramic(context);
-	_HANDLE_ERROR
 	_TIME
 
-    seperatedColors = isColorSeperated(&image);
-    if(seperatedColors || !cfg_transfer_compressed){
-        getColorOffset(&image, red_offset, green_offset, blue_offset);
-    }
-	
-	// Set the size of the image to be processed
-    if(cfg_postprocessing || cfg_panoramic){
-        status = "inspect image size";
-        if (cfg_ladybug_colorProcessing == LADYBUG_DOWNSAMPLE4 || 
-	        cfg_ladybug_colorProcessing == LADYBUG_MONO)
-        {
-	        uiRawCols = image.uiCols / 2;
-	        uiRawRows = image.uiRows / 2;
-        }else{
-	        uiRawCols = image.uiCols;
-	        uiRawRows = image.uiRows;
-        }
-        // Initialize alpha mask size - this can take a long time if the
-	    // masks are not present in the current directory.
-	    status = "Initializing alpha masks (this may take some time)...";
-	    error = ladybugInitializeAlphaMasks( context, uiRawCols, uiRawRows );
-	    _HANDLE_ERROR
-
-	    arpBufferSize = initBuffers(arpBuffers, LADYBUG_NUM_CAMERAS, uiRawCols, uiRawRows, 4);
-
-    }else if(seperatedColors){
-        uiRawCols = image.uiFullCols / 2;
-	    uiRawRows = image.uiFullRows / 2;
-    }
-    else{
-        uiRawCols = image.uiFullCols;
-        uiRawRows = image.uiFullRows;
-    }     
+     seperatedColors = isColorSeperated(&image);
+     if(seperatedColors || !lady->config->cfg_transfer_compressed){
+         getColorOffset(&image, red_offset, green_offset, blue_offset);
+     }
 	_TIME
 
     { 
@@ -156,22 +48,22 @@ _RESTART:
         int socket_type = ZMQ_PUB;
         bool zmq_bind = false;
 
-        if( cfg_transfer_compressed && (cfg_postprocessing || cfg_panoramic)){
+        if( lady->config->cfg_transfer_compressed && (lady->config->cfg_ladybug_colorProcessing || lady->config->cfg_panoramic)){
             connection = zmq_uncompressed;
             socket_type = ZMQ_PUSH;
             zmq_bind = true;
             
             for(unsigned int i=0; i < boost::thread::hardware_concurrency(); ++i){
-        	   threads.create_thread(std::bind(compressionThread, zmq_context, i)); //worker thread (jpg-compression)
+        	   threads.create_thread(std::bind(compressionThread, &zmq_context, i)); //worker thread (jpg-compression)
             }
-            threads.create_thread(std::bind(sendingThread, zmq_context));
+            threads.create_thread(std::bind(sendingThread, &zmq_context));
         }else{
-            connection = cfg_ros_master.c_str();
+            connection = lady->config->cfg_ros_master.c_str();
         }
 
         status = "connect with zmq to " + connection;
 
-	    socket = new zmq::socket_t(*zmq_context, socket_type);
+	    socket = new zmq::socket_t(zmq_context, socket_type);
 	    int val = 6; //buffer size
 	    socket->setsockopt(ZMQ_RCVHWM, &val, sizeof(val));  //prevent buffer get overfilled
 	    socket->setsockopt(ZMQ_SNDHWM, &val, sizeof(val));  //prevent buffer get overfilled
@@ -194,36 +86,24 @@ _RESTART:
         ladybug5_network::pbPosition position[6];
         ladybug5_network::pbDisortion disortion[6];
 
-        LadybugCameraInfo info;
-        ladybugGetCameraInfo(context, &info);
-
         for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 		{
+            CameraCalibration calib; 
+            error = lady->getCameraCalibration(uiCamera, &calib);
             status = "reading camera extrinics and disortion";
-            double extrinsics[6];
-            error = ladybugGetCameraUnitExtrinsics(context, uiCamera, extrinsics);
             _HANDLE_ERROR
+                
+            position[uiCamera].set_rx(calib.rotationX);
+            position[uiCamera].set_ry(calib.rotationY);
+            position[uiCamera].set_rz(calib.rotationZ);
+            position[uiCamera].set_tx(calib.translationX);
+            position[uiCamera].set_ty(calib.translationY);
+            position[uiCamera].set_tz(calib.translationZ);
 
-            double focal_lenght; 
-            error = ladybugGetCameraUnitFocalLength(context, uiCamera, &focal_lenght);
-            _HANDLE_ERROR
-
-            double centerX, centerY;
-            error = ladybugGetCameraUnitImageCenter(context , uiCamera, &centerX, &centerY);
-            _HANDLE_ERROR
-
-            position[uiCamera].set_rx(extrinsics[0]);
-            position[uiCamera].set_ry(extrinsics[1]);
-            position[uiCamera].set_rz(extrinsics[2]);
-            position[uiCamera].set_tx(extrinsics[3]);
-            position[uiCamera].set_ty(extrinsics[4]);
-            position[uiCamera].set_tz(extrinsics[5]);
-
-            //not propperly scaled for different resolution
-            //disortion[uiCamera].set_centerx(centerX);
-            //disortion[uiCamera].set_centery(centerY);
-            //disortion[uiCamera].set_focalx(focal_lenght);
-            //disortion[uiCamera].set_focaly(focal_lenght);
+            disortion[uiCamera].set_centerx(calib.centerX);
+            disortion[uiCamera].set_centery(calib.centerY);
+            disortion[uiCamera].set_focalx(calib.focal_lenght);
+            disortion[uiCamera].set_focaly(calib.focal_lenght);
             _TIME
         }
 
@@ -238,16 +118,12 @@ _RESTART:
 			    loopstart = t_now = clock();
 			    t_now = loopstart;
 
-
 			    // Grab an image from the camera
 			    std::string status = "grab image";
 
 			    /* Get ladybugImage */
-                if( filestream ){
-                    error = ladybugReadImageFromStream( streamContext, &image);
-                }else{
-                    error = ladybugGrabImage(context, &image); 
-                }
+                error = lady->grabImage(&image);
+                
 			    _HANDLE_ERROR
 			    _TIME
 
@@ -255,7 +131,7 @@ _RESTART:
                 message.set_name("windows");
 			    message.set_camera("ladybug5");
                 message.set_id(nr);
-                message.set_serial_number(std::to_string(info.serialBase));
+                message.set_serial_number(std::to_string(lady->caminfo.serialBase));
 
                 /* read the sensor data */        
                 accelerometer.set_x(image.imageHeader.accelerometer.x);
@@ -296,71 +172,47 @@ _RESTART:
                     image_msg->set_width(uiRawCols);
                     image_msg->set_allocated_distortion(new ladybug5_network::pbDisortion(disortion[uiCamera]));
                     image_msg->set_allocated_position(new ladybug5_network::pbPosition(position[uiCamera]));
-                    image_msg->set_packages(1);
-
-                    if( !cfg_postprocessing && !cfg_panoramic){
-                        if( !seperatedColors){
-                            image_msg->set_border_left(image.imageBorder.uiLeftCols);
-                            image_msg->set_border_right(image.imageBorder.uiRightCols);
-                            image_msg->set_border_top(image.imageBorder.uiTopRows);
-                            image_msg->set_border_bottem(image.imageBorder.uiBottomRows);
-                        }else{
-                            image_msg->set_packages(3);
-                            image_msg->set_border_left(image.imageBorder.uiLeftCols/2);
-                            image_msg->set_border_right(image.imageBorder.uiRightCols/2);
-                            image_msg->set_border_top(image.imageBorder.uiTopRows/2);
-                            image_msg->set_border_bottem(image.imageBorder.uiBottomRows/2);
-                        }
+                    if(seperatedColors && !lady->config->cfg_ladybug_colorProcessing && !lady->config->cfg_panoramic){
+                        image_msg->set_packages(3);
+                    }else{
+                        image_msg->set_packages(1);
                     }
                 }
 
                 /* Add panoramic image to pb message */
-                if(cfg_panoramic){  
+                if(lady->config->cfg_panoramic){  
                     ladybug5_network::pbImage* image_msg = 0;
 			        image_msg = message.add_images();
                     image_msg->set_type(ladybug5_network::LADYBUG_PANORAMIC);
 			        image_msg->set_name(enumToString(image_msg->type()));
-                    image_msg->set_height(cfg_pano_hight);
-                    image_msg->set_width(cfg_pano_width);
+                    image_msg->set_height(lady->config->cfg_pano_hight);
+                    image_msg->set_width(lady->config->cfg_pano_width);
                     image_msg->set_packages(1);
                 }
 
                 pb_send(socket, &message, ZMQ_SNDMORE);
 
-                if(cfg_postprocessing || cfg_panoramic)
-                {
-			        status = "Convert images to 6 BGRU buffers";
-			        // Convert the image to 6 BGRU buffers
-			        error = ladybugConvertImage(context, &image, arpBuffers);
-			        _HANDLE_ERROR
-			        _TIME
-                    
+                if(lady->config->cfg_ladybug_colorProcessing || lady->config->cfg_panoramic)
+                {                    
                     int flag = ZMQ_SNDMORE;
 				    status = "Adding images with processing";
 				    for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 				    {
-					    zmq::message_t raw_image(arpBufferSize);
-                        memcpy(raw_image.data(), arpBuffers[uiCamera], arpBufferSize);
+                        zmq::message_t raw_image(lady->getBuffer()->size);
+                        memcpy(raw_image.data(), lady->getBuffer()->getBuffer(uiCamera), lady->getBuffer()->size);
                            
-                        if( !cfg_panoramic && uiCamera == LADYBUG_NUM_CAMERAS-1 ){
+                        if( !lady->config->cfg_panoramic && uiCamera == LADYBUG_NUM_CAMERAS-1 ){
                             flag = 0;
                         }
                         socket->send(raw_image, flag ); // send BGRU images
 				    }
 				    _TIME
 
-                    if(cfg_panoramic){
-                     
-				        status = "Send RGB buffers to graphics card";
-				        // Send the RGB buffers to the graphics card
-				        error = ladybugUpdateTextures(context, LADYBUG_NUM_CAMERAS, NULL);
-				        _HANDLE_ERROR
-				        _TIME
-
+                    if(lady->config->cfg_panoramic){
 				        status = "create panorame in graphics card";
 				        // Stitch the images (inside the graphics card) and retrieve the output to the user's memory
 				        LadybugProcessedImage processedImage;
-				        error = ladybugRenderOffScreenImage(context, LADYBUG_PANORAMIC, LADYBUG_BGR, &processedImage);
+                        error = lady->grabProcessedImage(&processedImage, LADYBUG_PANORAMIC);
 				        _HANDLE_ERROR
 				        _TIME
 			
@@ -431,19 +283,13 @@ _RESTART:
 			    t_now = loopstart;
 			   
                 if(filestream){
-                    if(!cfg_panoramic && !cfg_postprocessing){
+                    if(!lady->config->cfg_panoramic && !lady->config->cfg_ladybug_colorProcessing){
                         Sleep(sleepTime); /* wait for the next frame. Only usefull for real time transfer, processing is slower than the framerate */
                     }
-                    if(nr == stream_image_count){
-                        //done = true; /* All images in stream are processed */
-                    }
-                    nr=nr%stream_image_count;
-                    error = ladybugGoToImage( streamContext, nr);
                 }
-
                 _TIME
-                socket_watchdog->send(msg_watchdog,ZMQ_NOBLOCK); // Loop done
 		    }
+		
 		    catch(std::exception e){
 			    printf("Exception, trying to recover\n");
 			    goto _EXIT; 
@@ -453,28 +299,12 @@ _RESTART:
 	
 	printf("Done.\n");
 _EXIT:
-	//
-	// clean up
-	//
-	ladybugStop( context );
-	ladybugDestroyContext( &context );
-    if(filestream)
-    {
-        ladybugDestroyStreamContext (&streamContext);
-    }
-
 	google::protobuf::ShutdownProtobufLibrary();
     if(socket != NULL){
         socket->close();
         delete socket;
     }
 	
-	for( int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ ){
-		if ( arpBuffers[ uiCamera ] != NULL )
-		{
-			delete  [] arpBuffers[ uiCamera ];
-		}
-	}
     if(done){
        Sleep(5000);
        threads.interrupt_all();
@@ -486,4 +316,5 @@ _EXIT:
     threads.interrupt_all();
     
 	goto _RESTART;
+    }
 }

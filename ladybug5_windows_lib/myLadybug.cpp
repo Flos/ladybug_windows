@@ -80,6 +80,7 @@ Ladybug::init(){
     _buffer = NULL;
     _stream = NULL;
     images_processed = false;
+    initialised_processing = false;
     error = ladybugCreateContext( &context );
     _ERROR_NORETURN
 }
@@ -99,6 +100,7 @@ Ladybug::Ladybug(Configuration* config){
     else{
         error = initStream(this->config->cfg_fileStream);
     }
+    _ERROR_NORETURN
     error = start();
     _ERROR_NORETURN
 };
@@ -123,7 +125,7 @@ Ladybug::initCamera()
 	// Initialize camera
 	printf( "Initializing camera...\n" );
 	LadybugError error = LADYBUG_NOT_STARTED;
-	
+
 	error = ladybugInitializeFromIndex( context, 0 );
 	_ERROR
 
@@ -135,6 +137,7 @@ Ladybug::initCamera()
     // Get camera info
 	printf( "Getting camera info...\n" );
 	error = ladybugGetCameraInfo( context, &caminfo );
+    _ERROR
 
     // Set Exposure mode
     error = ladybugSetAutoExposureROI( context, config->cfg_ladybug_autoExposureMode);
@@ -166,10 +169,17 @@ Ladybug::initStream(std::string path_streamfile){
     return error;
 }
 
+bool
+Ladybug::isFileStream(){
+    return !config->cfg_fileStream.empty();
+}
+
 LadybugError 
 Ladybug::initProcessing(){
+    _ERROR
     LadybugImage image;
-    grabImage(&image);
+    error = grabImage(&image);
+    _ERROR
 
 	// Set the panoramic view angle
 	error = ladybugSetPanoramicViewingAngle( context, LADYBUG_FRONT_0_POLE_5);
@@ -226,27 +236,59 @@ Ladybug::initProcessing(){
         error = ladybugInitializeAlphaMasks( context, uiRawCols, uiRawRows );
         _ERROR;
     }
-	return error;
 
+    initialised_processing = true;
+
+	return error;
+}
+
+double 
+Ladybug::getCycleTime(){
+    if( _stream != NULL)
+    {
+        return 1000/_stream->streamHeadInfo.ulFrameRate;
+    }
+    else
+    {
+        if(config->cfg_ladybug_dataformat == LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG12 
+            || config->cfg_ladybug_dataformat == LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG8
+            || config->cfg_ladybug_dataformat == LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW8)
+        {
+            return 1000/16; // 16 FPS
+        }
+        else if(config->cfg_ladybug_dataformat == LADYBUG_DATAFORMAT_COLOR_SEP_JPEG12
+            || config->cfg_ladybug_dataformat == LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8)
+        {
+            return 1000/10;
+        }
+        else if(config->cfg_ladybug_dataformat == LADYBUG_DATAFORMAT_RAW8
+            || config->cfg_ladybug_dataformat == LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW16)
+        {
+            return 1000/8;
+        }
+        else{
+            throw new std::exception("Dataformat not implemented");
+        }
+    }  
 }
 
 /* Ladybug live and filestream */
 LadybugError 
 Ladybug::start(){
-	
-    _ERROR
 	printf("Starting %s (%u)...\n", caminfo.pszModelName, caminfo.serialHead);
-
-    if(config->cfg_rectification || config->cfg_panoramic){
-        initProcessing();
-    }
+    _ERROR
+    error = initProcessing();
+    _ERROR
     error = grabImage(&_raw_image);
+    _ERROR
 
 	return error;
 }
 
 LadybugError 
 Ladybug::getCameraCalibration(unsigned int camera_index, CameraCalibration* calibration){
+    _ERROR
+    if(!initialised_processing){ initProcessing(); };
     double extrinsics[6];
     error = ladybugGetCameraUnitExtrinsics(context, camera_index, extrinsics);
     _ERROR
@@ -270,7 +312,8 @@ Ladybug::grabProcessedImage(LadybugProcessedImage* image, LadybugOutputImage ima
     if(!images_processed){
         error = ladybugConvertImage(context, &_raw_image, _buffer->buffers);
         _ERROR
-        error = ladybugUpdateTextures(context, LADYBUG_NUM_CAMERAS, NULL);
+        error = ladybugUpdateTextures(context, LADYBUG_NUM_CAMERAS, (const unsigned char**)_buffer->buffers);
+        _ERROR
         images_processed = true;
     }
     error = ladybugRenderOffScreenImage(context, imageType, LADYBUG_BGR, image);

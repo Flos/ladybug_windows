@@ -13,9 +13,6 @@
     <ClCompile Include="thread_sending.cpp">
       <Filter>threads</Filter>
     </ClCompile>
-    <ClCompile Include="protobuf\imageMessage.pb.cc">
-      <Filter>protobuf</Filter>
-    </ClCompile>
     <ClCompile Include="ladybug_stream.cpp">
       <Filter>helper</Filter>
     </ClCompile>
@@ -37,6 +34,15 @@
     <ClCompile Include="configuration.cpp">
       <Filter>helper</Filter>
     </ClCompile>
+    <ClCompile Include="thread_ladybug.cpp">
+      <Filter>threads</Filter>
+    </ClCompile>
+    <ClCompile Include="..\protobuf\imageMessage.pb.cc">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="grabSend.cpp">
+      <Filter>threads</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="helper">
@@ -44,9 +50,6 @@
     </Filter>
     <Filter Include="threads">
       <UniqueIdentifier>{3a8680de-4c17-4dcc-8771-f5382922c3ef}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="protobuf">
-      <UniqueIdentifier>{d505ac08-ed0a-4890-950b-3e0cb311afdc}</UniqueIdentifier>
     </Filter>
     <Filter Include="header">
       <UniqueIdentifier>{0ca2853e-6f28-4bcb-b0c0-58d0fca834fb}</UniqueIdentifier>
@@ -87,6 +90,12 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="include\myLadybug.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\protobuf\imageMessage.pb.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grabSend.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
