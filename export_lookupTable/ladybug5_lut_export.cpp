@@ -36,28 +36,58 @@ void fillMap(unsigned int h, unsigned int w, cv::Mat &mat_x, cv::Mat &mat_y, Lad
     }
 }
 
-void save(cv::Mat &mat, std::string filename){
+void save(cv::Mat &mat_x, cv::Mat &mat_y, std::string filename, CameraCalibration calib, int camera){
     std::cout << "Exporting " << filename << std::endl; 
     cv::FileStorage fs(filename.c_str(), cv::FileStorage::WRITE);
-    fs << "mat" << mat;
+    fs << "camera" << camera;
+    fs << "centerX" << calib.centerX;
+    fs << "centerY" << calib.centerY;
+    fs << "focal_lenghtX" << calib.focal_lenght;
+    fs << "focal_lenghtY" << calib.focal_lenght;
+    fs << "rotationX" << calib.rotationX;
+    fs << "rotationY" << calib.rotationY;
+    fs << "rotationZ" << calib.rotationZ;
+    fs << "translationX" << calib.translationX;
+    fs << "translationY" << calib.translationY;
+    fs << "translationZ" << calib.translationZ;
+    fs << "remap_x" << mat_x;
+    fs << "remap_y" << mat_y;
     fs.release();
 }
 
-void load(cv::Mat &mat, std::string filename){
+void load(cv::Mat &mat_x, cv::Mat &mat_y, std::string filename, CameraCalibration &calib){
     cv::FileStorage fs(filename.c_str(), cv::FileStorage::READ);
-    fs["mat"] >> mat;
+    fs["centerX"] >> calib.centerX;
+    fs["centerY"] >> calib.centerY;
+    fs["focal_lenghtX"] >> calib.focal_lenght;
+    fs["focal_lenghtY"] >> calib.focal_lenght;
+    fs["rotationX"] >> calib.rotationX;
+    fs["rotationY"] >> calib.rotationY;
+    fs["rotationZ"] >> calib.rotationZ;
+    fs["translationX"] >> calib.translationX;
+    fs["translationY"] >> calib.translationY;
+    fs["translationZ"] >> calib.translationZ;
+    fs["remap_x"] >> mat_x;
+    fs["remap_y"] >> mat_y;
     fs.release();
 }
 void createCalibrationMaps(unsigned int h, unsigned int w, unsigned int camera, cv::Mat &morph_mat_x, cv::Mat &morph_mat_y, Ladybug &lady) { // Remap
-    std::string filenameX = std::to_string(lady.caminfo.serialHead) + "_camera" + std::to_string(camera) + "_h" + std::to_string(h) +"_w" +  std::to_string(w) + "_map_x.yaml";
-    std::string filenameY = std::to_string(lady.caminfo.serialHead) + "_camera" + std::to_string(camera) + "_h" + std::to_string(h) +"_w" +  std::to_string(w) + "_map_y.yaml";
+    std::string filename = std::to_string(lady.caminfo.serialHead) + "_camera" + std::to_string(camera) + "_h" + std::to_string(h) +"_w" +  std::to_string(w) + ".yaml";
     
     fillMap(h, w, morph_mat_x, morph_mat_y, lady, camera);
     //cv::imwrite(filenameX.c_str(), morph_mat_x);
     //cv::imwrite(filenameY.c_str(), morph_mat_y);
+
+    //reduce map accurancy for speed up;
+    cv::Mat reduced_map_x(morph_mat_x.size(), CV_16SC2 );
+    cv::Mat reduced_map_y(morph_mat_y.size(), CV_16SC2 );
+
+     cv::convertMaps(morph_mat_x, morph_mat_y, reduced_map_x, reduced_map_y, CV_16SC2);
+
+    CameraCalibration cam;
+    lady.getCameraCalibration(camera, &cam);
    
-    save(morph_mat_x, filenameX.c_str());
-    save(morph_mat_y, filenameY.c_str());
+    save(reduced_map_x, reduced_map_y, filename.c_str(), cam, camera);
 }
 
 void main( int argc, char* argv[] ){   
