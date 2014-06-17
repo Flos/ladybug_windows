@@ -9,6 +9,17 @@ GrabSend::GrabSend(zmq::context_t* zmq_context){
     stop = false;
 
     Configuration config;
+
+	if(config.cfg_panoramic){
+		config.cfg_panoramic=false;
+		printf("panoramic image creation not supported in grabber...\n");
+	}
+
+	if(config.cfg_transfer_compressed){
+		config.cfg_transfer_compressed=false;
+		printf("compressed image transfer is not supported in grabber...\n");
+	}
+
     lady = new Ladybug(&config);
    
      //-----------------------------------------------
@@ -185,16 +196,6 @@ GrabSend::loop(){
             }
         }
 
-        /* Add panoramic image to pb message */
-        if(lady->config->cfg_panoramic){  
-            ladybug5_network::pbImage* image_msg = 0;
-		    image_msg = message.add_images();
-            image_msg->set_type(ladybug5_network::LADYBUG_PANORAMIC);
-		    image_msg->set_name(enumToString(image_msg->type()));
-            image_msg->set_height(lady->config->cfg_pano_hight);
-            image_msg->set_width(lady->config->cfg_pano_width);
-            image_msg->set_packages(1);
-        }
         //send protobuff message
         pb_send(socket, &message, ZMQ_SNDMORE); 
 
@@ -203,6 +204,10 @@ GrabSend::loop(){
 
         for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
         {
+			if( uiCamera == LADYBUG_NUM_CAMERAS-1 ){
+                    flag = 0;
+            }
+
             if(seperatedColors)
             {
                 unsigned int index = uiCamera*4;
@@ -217,10 +222,6 @@ GrabSend::loop(){
                 extractImageToMsg(&image, index+green_offset,   &g_data, g_size);
                 extractImageToMsg(&image, index+red_offset,     &r_data, r_size);
                             
-                if( uiCamera == LADYBUG_NUM_CAMERAS-1  && !lady->config->cfg_panoramic){
-                    flag = 0;
-                }
-
                 //RGB expected at reciever
                 zmq::message_t R(r_size);
                 memcpy(R.data(), r_data, r_size);
@@ -241,25 +242,10 @@ GrabSend::loop(){
                 extractImageToMsg(&image, uiCamera, &image_data, image_size);
                 zmq::message_t msg_image(image_size);
                 memcpy(msg_image.data(), image_data, image_size);
+
+				socket->send(msg_image, flag );
             }
         } // end uiCamera loop
-
-        if(lady->config->cfg_panoramic)
-        {
-		    status = "create panorame in graphics card";
-		    // Stitch the images (inside the graphics card) and retrieve the output to the user's memory
-		    LadybugProcessedImage processedImage;
-            lady->grabProcessedImage(&processedImage, LADYBUG_PANORAMIC);
-		    _HANDLE_ERROR_LADY
-		    _TIME
-
-            unsigned int size = processedImage.uiCols*processedImage.uiRows*3;
-            zmq::message_t raw_image(size);
-            memcpy(raw_image.data(), processedImage.pData, size);                    
-            socket->send(raw_image, 0 ); // panoramic is the last image
-		    status = "send img over network";
-            _TIME
-        }
 
         message.Clear();
         msg_timestamp.Clear();

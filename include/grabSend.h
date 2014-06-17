@@ -10,6 +10,7 @@ public:
     boost::thread_group threads;
     bool stop;
 private:
+	void msg_sensordata();
     unsigned int nr;
     double t_now;
     zmq::message_t msg_watchdog;
@@ -20,6 +21,7 @@ private:
     unsigned int uiRawCols;
 	unsigned int uiRawRows;
     LadybugImage image;
+	LadybugProcessedImage processedImage;
     std::string status;
     bool seperatedColors;
     unsigned int red_offset;
