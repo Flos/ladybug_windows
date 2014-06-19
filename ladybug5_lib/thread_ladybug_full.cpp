@@ -312,6 +312,9 @@ _RESTART:
                             image_msg->set_border_bottem(image.imageBorder.uiBottomRows/2);
                         }
                     }
+					else{
+						image_msg->set_bayer_encoding("BGRA8");
+					}
                 }
 
                 /* Add panoramic image to pb message */
@@ -323,6 +326,9 @@ _RESTART:
                     image_msg->set_height(cfg_pano_hight);
                     image_msg->set_width(cfg_pano_width);
                     image_msg->set_packages(1);
+					if(!cfg_transfer_compressed){
+						image_msg->set_bayer_encoding("BGR8");
+					}
                 }
 
                 pb_send(socket, &message, ZMQ_SNDMORE);
