@@ -31,13 +31,13 @@ LadybugStream::LadybugStream(LadybugContext& context, std::string filename, bool
 	    
     error = ladybugGetStreamHeader( streamContext, &streamHeadInfo);
     _ERROR_NORETURN
+
+	LadybugImage image;
+    error = ladybugReadImageFromStream( streamContext, &image);
+    _ERROR_NORETURN
    
     configfile = filename + ".cfg";
     error = ladybugGetStreamConfigFile( streamContext , configfile.c_str() );
-    _ERROR_NORETURN
-
-    LadybugImage image;
-    error = ladybugReadImageFromStream( streamContext, &image);
     _ERROR_NORETURN
 
     error = ladybugLoadConfig( context, configfile.c_str() );
@@ -177,10 +177,6 @@ Ladybug::isFileStream(){
 LadybugError 
 Ladybug::initProcessing(){
     _ERROR
-    LadybugImage image;
-    error = grabImage(&image);
-    _ERROR
-
 	// Set the panoramic view angle
 	error = ladybugSetPanoramicViewingAngle( context, LADYBUG_FRONT_0_POLE_5);
 	_ERROR
@@ -193,16 +189,16 @@ Ladybug::initProcessing(){
     error = ladybugSetColorProcessingMethod( context, config->cfg_ladybug_colorProcessing );
 	_ERROR
 
-    unsigned int uiRawCols = image.uiCols;
-	unsigned int uiRawRows = image.uiRows;
+    unsigned int uiRawCols = _raw_image.uiCols;
+	unsigned int uiRawRows = _raw_image.uiRows;
     if (config->cfg_ladybug_colorProcessing == LADYBUG_DOWNSAMPLE4 || 
 	        config->cfg_ladybug_colorProcessing == LADYBUG_MONO)
     {
-	    uiRawCols = image.uiCols / 2;
-	    uiRawRows = image.uiRows / 2;
+	    uiRawCols = _raw_image.uiCols / 2;
+	    uiRawRows = _raw_image.uiRows / 2;
     }
 
-    _buffer = new ArpBuffer(uiRawCols, uiRawRows, 4);
+    //_buffer = new ArpBuffer(uiRawCols, uiRawRows, 4);
 
     if(config->cfg_panoramic || config->cfg_rectification){
         unsigned int uiImageTypes = 0;
@@ -221,7 +217,7 @@ Ladybug::initProcessing(){
                 config->cfg_pano_hight );  
 	        _ERROR
         }
-        if(config->cfg_rectification){
+        else if(config->cfg_rectification){
             //  
             // Rectified images
             //   
@@ -276,10 +272,10 @@ Ladybug::getCycleTime(){
 LadybugError 
 Ladybug::start(){
 	printf("Starting %s (%u)...\n", caminfo.pszModelName, caminfo.serialHead);
+	_ERROR
+    error = grabImage(&_raw_image);
     _ERROR
     error = initProcessing();
-    _ERROR
-    error = grabImage(&_raw_image);
     _ERROR
 
 	return error;
@@ -310,9 +306,11 @@ Ladybug::getCameraCalibration(unsigned int camera_index, CameraCalibration* cali
 LadybugError 
 Ladybug::grabProcessedImage(LadybugProcessedImage* image, LadybugOutputImage imageType){
     if(!images_processed){
-        error = ladybugConvertImage(context, &_raw_image, _buffer->buffers);
+
+        error = ladybugConvertImage(context, &_raw_image, NULL); // _buffer->buffers);
         _ERROR
-        error = ladybugUpdateTextures(context, LADYBUG_NUM_CAMERAS, (const unsigned char**)_buffer->buffers);
+
+        error = ladybugUpdateTextures(context, LADYBUG_NUM_CAMERAS, NULL);
         _ERROR
         images_processed = true;
     }
