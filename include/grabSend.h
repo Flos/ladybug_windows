@@ -28,12 +28,6 @@ private:
     unsigned int green_offset;
     unsigned int blue_offset;
     ladybug5_network::pbMessage message;
-    ladybug5_network::LadybugTimeStamp msg_timestamp;
-
-    ladybug5_network::pbFloatTriblet gyro;
-    ladybug5_network::pbFloatTriblet accelerometer;
-    ladybug5_network::pbFloatTriblet compass;
-    ladybug5_network::pbSensor sensor;
         
     ladybug5_network::pbPosition position[6];
     ladybug5_network::pbDisortion disortion[6];

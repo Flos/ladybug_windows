@@ -3,9 +3,13 @@
 #include "grabSend.h"
 
 void main( int argc, char* argv[] ){
-    SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED);
+	/* Prevent windows to go to sleep */
+    SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED); 
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-    initConfig(argc, argv);
+
+	/*Load config file*/
+    initConfig(argc, argv); 
+
     std::cout << std::endl << "Number of Cores: " << boost::thread::hardware_concurrency() << std::endl;  
     zmq::context_t* zmq_context = new zmq::context_t(2);
     zmq::socket_t* socket_watchdog = NULL;
