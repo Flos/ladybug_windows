@@ -134,39 +134,8 @@ GrabSend::loop(){
 	    _HANDLE_ERROR_LADY
 	    _TIME
 
-        /* Create and fill protobuf message */
-        message.set_name("windows");
-	    message.set_camera("ladybug5");
-        message.set_id(nr);
-        message.set_serial_number(std::to_string(lady->caminfo.serialBase));
-
-        /* read the sensor data */        
-        accelerometer.set_x(image.imageHeader.accelerometer.x);
-        accelerometer.set_y(image.imageHeader.accelerometer.y);
-        accelerometer.set_z(image.imageHeader.accelerometer.z);
-        sensor.set_allocated_accelerometer(new ladybug5_network::pbFloatTriblet(accelerometer));
- 
-        compass.set_x(image.imageHeader.compass.x);
-        compass.set_y(image.imageHeader.compass.y);
-        compass.set_z(image.imageHeader.compass.z);
-        sensor.set_allocated_compass(new ladybug5_network::pbFloatTriblet(compass));
-
-        gyro.set_x(image.imageHeader.gyroscope.x);
-        gyro.set_y(image.imageHeader.gyroscope.y);
-        gyro.set_z(image.imageHeader.gyroscope.z);
-        sensor.set_allocated_gyroscope(new ladybug5_network::pbFloatTriblet(gyro));
-
-        sensor.set_humidity(image.imageHeader.uiHumidity);
-        sensor.set_barometer(image.imageHeader.uiAirPressure);
-        sensor.set_temperature(image.imageHeader.uiTemperature);
-        message.set_allocated_sensors(new ladybug5_network::pbSensor(sensor));         
-		
-	    msg_timestamp.set_ulcyclecount(image.timeStamp.ulCycleCount);
-	    msg_timestamp.set_ulcycleoffset(image.timeStamp.ulCycleOffset);
-	    msg_timestamp.set_ulcycleseconds(image.timeStamp.ulCycleSeconds);
-	    msg_timestamp.set_ulmicroseconds(image.timeStamp.ulMicroSeconds);
-	    msg_timestamp.set_ulseconds(image.timeStamp.ulSeconds);
-        message.set_allocated_time(new ladybug5_network::LadybugTimeStamp(msg_timestamp));
+		prefill_sensordata(message, image); 
+   
 
         for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
 	    {
@@ -213,42 +182,22 @@ GrabSend::loop(){
                 unsigned int index = uiCamera*4;
                 //send images 
                      
-                unsigned int r_size, g_size, b_size;
-                char* r_data = NULL;
-                char* g_data = NULL;
-                char* b_data = NULL;
-
-                extractImageToMsg(&image, index+blue_offset,    &b_data, b_size);
-                extractImageToMsg(&image, index+green_offset,   &g_data, g_size);
-                extractImageToMsg(&image, index+red_offset,     &r_data, r_size);
-                            
                 //RGB expected at reciever
-                zmq::message_t R(r_size);
-                memcpy(R.data(), r_data, r_size);
-                socket->send(R, ZMQ_SNDMORE ); // Red = Index + 3
+				// Red = Index + 3
+				send_image(index+red_offset, &image, socket, flag);
 
-                zmq::message_t G(g_size);
-                memcpy(G.data(), g_data, g_size);
-                socket->send(G, ZMQ_SNDMORE ); // Green = Index + 1 || 2
+				// Green = Index + 1 || 2
+				send_image(index+green_offset, &image, socket, flag);
 
-                zmq::message_t B(b_size);     // Blue = Index 0
-                memcpy(B.data(), b_data, b_size);
-                socket->send(B, flag );
+				// Blue = Index 0
+        		send_image(index+blue_offset, &image, socket, flag);
                         
             }else{ /* RGGB RAW */
-                unsigned int image_size = 0;
-                char* image_data = NULL;
-                       
-                extractImageToMsg(&image, uiCamera, &image_data, image_size);
-                zmq::message_t msg_image(image_size);
-                memcpy(msg_image.data(), image_data, image_size);
-
-				socket->send(msg_image, flag );
+				send_image(uiCamera, &image, socket, flag);
             }
         } // end uiCamera loop
 
         message.Clear();
-        msg_timestamp.Clear();
         ++nr;
 	    
         socket_watchdog->send(msg_watchdog, ZMQ_NOBLOCK); // Loop done
