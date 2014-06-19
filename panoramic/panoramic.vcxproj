@@ -19,10 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{44AE8AF6-A26F-4348-AB13-6A706A74E3D2}</ProjectGuid>
+    <ProjectGuid>{075BD3B4-B2B4-48BB-A103-1284607DD0F0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>ladybug5_lut_export</RootNamespace>
-    <ProjectName>export_lookupTable</ProjectName>
+    <RootNamespace>panoramic</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -35,7 +34,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -72,43 +71,39 @@
     <OutDir>..\bin\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-    <IncludePath>C:\work\zguide\examples\C;C:\opt\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath);C:\Program Files %28x86%29\Visual Leak Detector\include</IncludePath>
-    <LibraryPath>$(LibraryPath);C:\Program Files %28x86%29\Visual Leak Detector\lib\Win32</LibraryPath>
+    <IncludePath>../include;../protobuf;C:\opt\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\Program Files %28x86%29\Visual Leak Detector\lib\Win64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-    <IncludePath>C:\opt\opencv\build\include;../include;C:\work\zguide\examples\C;C:\opt\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\opt\opencv\build\x64\vc11\lib;$(LibraryPath);</LibraryPath>
-    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>../include;../protobuf;C:\opt\boost_1_55_0;C:\work\zguide\examples\C;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath);</LibraryPath>
+    <LinkIncremental>false</LinkIncremental>
     <OutDir>..\bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\work\ladybug_network-windows_client\ladybug5_windows_lib\include;C:\work\zguide\examples\C;C:\local\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\opt\opencv\build\include;../include;C:\work\zguide\examples\C;C:\local\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath);</LibraryPath>
-    <OutDir>..\bin\</OutDir>
-    <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ladybug.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>../bin/$(ProjectName)_$(Platform)_$(Configuration).exe</OutputFile>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);ladybug.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\local\boost_1_55_0\lib64-msvc-11.0;C:\opt\libjpeg-turbo64\lib;C:\opt\zeromq\builds\msvc\x64\Debug;C:\opt\protobuf\vsprojects\x64\Debug;C:\Program Files\Point Grey Research\Ladybug\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\opt\boost_1_55_0\lib64-msvc-11.0;C:\opt\libjpeg-turbo64\lib;C:\opt\zeromq\builds\msvc\x64\Debug;C:\opt\protobuf\vsprojects\x64\Debug;C:\Program Files\Point Grey Research\Ladybug\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -117,26 +112,30 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN64;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MinimalRebuild>false</MinimalRebuild>
+      <AssemblerListingLocation>.\x64\Debug/</AssemblerListingLocation>
+      <ObjectFileName>.\x64\Debug/</ObjectFileName>
+      <ProgramDataBaseFileName>.\x64\Debug/$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ladybug.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>../bin/$(ProjectName)_$(Platform)_$(Configuration).exe</OutputFile>
-      <AdditionalDependencies>ladybug.lib;opencv_imgproc249d.lib;opencv_core249d.lib;opencv_highgui249d.lib;opencv_calib3d249d.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\opt\opencv\build\x64\vc11\lib;C:\opt\boost_1_55_0\lib64-msvc-11.0;C:\opt\libjpeg-turbo64\lib;C:\opt\zeromq\builds\msvc\x64\Debug;C:\opt\protobuf\vsprojects\x64\Debug;C:\Program Files\Point Grey Research\Ladybug\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\opt\boost_1_55_0\lib64-msvc-11.0;C:\opt\libjpeg-turbo64\lib;C:\opt\zeromq\builds\msvc\x64\Debug;C:\opt\protobuf\vsprojects\x64\Debug;C:\Program Files\Point Grey Research\Ladybug\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,32 +147,25 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN64;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ladybug.lib;opencv_core248.lib;opencv_imgproc248.lib;opencv_highgui248.lib;opencv_calib3d248.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\opt\opencv\build\x64\vc11\lib;C:\local\boost_1_55_0\lib64-msvc-11.0;C:\opt\libjpeg-turbo64\lib;C:\opt\zeromq\builds\msvc\x64\Release;C:\opt\protobuf\vsprojects\x64\Release;C:\Program Files\Point Grey Research\Ladybug\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <OutputFile>../bin/$(ProjectName)_$(Platform)_$(Configuration).exe</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="targetver.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="ladybug5_lut_export.cpp" />
+    <ClCompile Include="panoramic.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ladybug5_lib\ladybug5_windows_lib.vcxproj">

@@ -43,6 +43,7 @@
     <ClCompile Include="grabSend.cpp">
       <Filter>threads</Filter>
     </ClCompile>
+    <ClCompile Include="thread_panoramic.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="helper">

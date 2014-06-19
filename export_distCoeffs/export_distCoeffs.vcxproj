@@ -71,7 +71,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../protobuf;C:\opt\opencv\build\include;../include;C:\work\zguide\examples\C;C:\local\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
+    <IncludePath>../protobuf;C:\opt\opencv\build\include;../include;C:\work\zguide\examples\C;C:\opt\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\opt\opencv\build\x64\vc11\lib;$(LibraryPath);C:\Program Files %28x86%29\Visual Leak Detector\lib\Win64</LibraryPath>
     <OutDir>..\bin\</OutDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
@@ -112,8 +112,8 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>../bin/$(ProjectName)_$(Platform)_$(Configuration).exe</OutputFile>
-      <AdditionalDependencies>ladybug.lib;opencv_imgproc248d.lib;opencv_core248d.lib;opencv_highgui248d.lib;opencv_calib3d248d.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\opt\opencv\build\x64\vc11\lib;C:\local\boost_1_55_0\lib64-msvc-11.0;C:\opt\libjpeg-turbo64\lib;C:\opt\zeromq\builds\msvc\x64\Debug;C:\opt\protobuf\vsprojects\x64\Debug;C:\Program Files\Point Grey Research\Ladybug\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ladybug.lib;opencv_imgproc249d.lib;opencv_core249d.lib;opencv_highgui249d.lib;opencv_calib3d249d.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\opt\opencv\build\x64\vc11\lib;C:\opt\boost_1_55_0\lib64-msvc-11.0;C:\opt\libjpeg-turbo64\lib;C:\opt\zeromq\builds\msvc\x64\Debug;C:\opt\protobuf\vsprojects\x64\Debug;C:\Program Files\Point Grey Research\Ladybug\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
