@@ -1,17 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -25,23 +17,10 @@
     <ProjectName>export_lookupTable</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -54,63 +33,28 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\bin\</OutDir>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-    <IncludePath>C:\work\zguide\examples\C;C:\opt\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath);C:\Program Files %28x86%29\Visual Leak Detector\include</IncludePath>
-    <LibraryPath>$(LibraryPath);C:\Program Files %28x86%29\Visual Leak Detector\lib\Win32</LibraryPath>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-    <IncludePath>C:\opt\opencv\build\include;../include;C:\work\zguide\examples\C;C:\opt\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\opt\opencv\build\x64\vc11\lib;$(LibraryPath);</LibraryPath>
+    <IncludePath>$(OPENCV)\build\include;$(PROTOBUF)\vsprojects\include;../include;../protobuf;$(ZMQ)\include;$(JPG_TURBO)\include;$(BOOST);$(LADYBUG)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OPENCV)\build\x64\vc11\lib;$(LibraryPath);</LibraryPath>
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\bin\</OutDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\work\ladybug_network-windows_client\ladybug5_windows_lib\include;C:\work\zguide\examples\C;C:\local\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\opt\opencv\build\include;../include;C:\work\zguide\examples\C;C:\local\boost_1_55_0;C:\opt\libjpeg-turbo64\include;C:\opt\protobuf\vsprojects\include;C:\opt\zeromq\include;C:\Program Files\Point Grey Research\Ladybug\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath);</LibraryPath>
+    <IncludePath>$(OPENCV)\build\include;$(PROTOBUF)\vsprojects\include;../include;../protobuf;$(ZMQ)\include;$(JPG_TURBO)\include;$(BOOST);$(LADYBUG)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OPENCV)\build\x64\vc11\lib;$(LibraryPath);</LibraryPath>
     <OutDir>..\bin\</OutDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <OutputFile>../bin/$(ProjectName)_$(Platform)_$(Configuration).exe</OutputFile>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);ladybug.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\local\boost_1_55_0\lib64-msvc-11.0;C:\opt\libjpeg-turbo64\lib;C:\opt\zeromq\builds\msvc\x64\Debug;C:\opt\protobuf\vsprojects\x64\Debug;C:\Program Files\Point Grey Research\Ladybug\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -125,24 +69,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>../bin/$(ProjectName)_$(Platform)_$(Configuration).exe</OutputFile>
       <AdditionalDependencies>ladybug.lib;opencv_imgproc249d.lib;opencv_core249d.lib;opencv_highgui249d.lib;opencv_calib3d249d.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\opt\opencv\build\x64\vc11\lib;C:\opt\boost_1_55_0\lib64-msvc-11.0;C:\opt\libjpeg-turbo64\lib;C:\opt\zeromq\builds\msvc\x64\Debug;C:\opt\protobuf\vsprojects\x64\Debug;C:\Program Files\Point Grey Research\Ladybug\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(BOOST)\lib64-msvc-11.0;$(JPG_TURBO)\lib;$(ZMQ)\lib;$(PROTOBUF)\vsprojects\x64\Debug;$(LADYBUG)\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -161,8 +88,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>ladybug.lib;opencv_core248.lib;opencv_imgproc248.lib;opencv_highgui248.lib;opencv_calib3d248.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\opt\opencv\build\x64\vc11\lib;C:\local\boost_1_55_0\lib64-msvc-11.0;C:\opt\libjpeg-turbo64\lib;C:\opt\zeromq\builds\msvc\x64\Release;C:\opt\protobuf\vsprojects\x64\Release;C:\Program Files\Point Grey Research\Ladybug\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ladybug.lib;opencv_core249.lib;opencv_imgproc249.lib;opencv_highgui249.lib;opencv_calib3d249.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(BOOST)\lib64-msvc-11.0;$(JPG_TURBO)\lib;$(ZMQ)\lib;$(PROTOBUF)\vsprojects\x64\Release;$(LADYBUG)\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>../bin/$(ProjectName)_$(Platform)_$(Configuration).exe</OutputFile>
     </Link>
   </ItemDefinitionGroup>

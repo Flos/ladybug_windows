@@ -9,7 +9,4 @@
   <ItemGroup>
     <ClCompile Include="full_processing.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="full_processing.h" />
-  </ItemGroup>
 </Project>

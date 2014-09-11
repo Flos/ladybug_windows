@@ -155,7 +155,8 @@ void main( int argc, char* argv[] )
     config.cfg_panoramic = false;
     config.cfg_ladybug_colorProcessing = LADYBUG_HQLINEAR;
     
-    Ladybug lady(&config);
+    Ladybug lady;
+	lady.init(&config);
      //Get ladybug calibration
     CameraCalibration calibration;
     LadybugError error = LADYBUG_OK;
