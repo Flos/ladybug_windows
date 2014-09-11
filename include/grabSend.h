@@ -4,10 +4,10 @@
 
 class GrabSend{
 public:
-    GrabSend(zmq::context_t* zmq_context);
+    GrabSend();
+	void init(zmq::context_t* zmq_context);
     int loop();
     ~GrabSend();
-    boost::thread_group threads;
     bool stop;
 private:
 	void msg_sensordata();

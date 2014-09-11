@@ -1,26 +1,44 @@
 #include "grabSend.h"
 
-GrabSend::GrabSend(zmq::context_t* zmq_context){
+GrabSend::GrabSend(){
     socket = NULL;
     socket_watchdog = NULL;
     uiRawCols = 0;
     uiRawRows = 0;
     seperatedColors = false;
     stop = false;
+	lady = NULL;
 
-    Configuration config;
+    
+
+}
+
+void
+GrabSend::init(zmq::context_t* zmq_context)
+{
+	Configuration config;
 
 	if(config.cfg_panoramic){
 		config.cfg_panoramic=false;
-		printf("panoramic image creation not supported in grabber...\n");
+		printf("Warning: panoramic image creation not supported in grabber...\n");
 	}
 
 	if(config.cfg_transfer_compressed){
 		config.cfg_transfer_compressed=false;
-		printf("compressed image transfer is not supported in grabber...\n");
+		printf("Warning: compressed image transfer is not supported in grabber...\n");
 	}
 
-    lady = new Ladybug(&config);
+	if(config.cfg_ladybug_dataformat != LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG8 
+		|| config.cfg_ladybug_dataformat != LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8
+		|| config.cfg_ladybug_dataformat != LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG12
+		|| config.cfg_ladybug_dataformat != LADYBUG_DATAFORMAT_COLOR_SEP_JPEG12
+		){
+		config.cfg_ladybug_dataformat = LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8;
+		printf("Warning: only jpeg color seperated dataformats are supported...\n");
+	}
+
+	lady = new Ladybug();
+	lady->init(&config);
    
      //-----------------------------------------------
     //create watchdog
@@ -35,48 +53,25 @@ GrabSend::GrabSend(zmq::context_t* zmq_context){
     lady->grabImage(&image);
    
     seperatedColors = isColorSeperated(&image);
-    if(seperatedColors || !lady->config->cfg_transfer_compressed){
+    if(seperatedColors){
         getColorOffset(&image, red_offset, green_offset, blue_offset);
     }
+	else{
+		throw new std::exception("only jepeg color sep images are supported in grabber");
+	}
 	
 	// Set the size of the image to be processed
-    if(lady->config->cfg_rectification || lady->config->cfg_panoramic){
-        status = "inspect image size";
-        if (lady->config->cfg_ladybug_colorProcessing == LADYBUG_DOWNSAMPLE4 || 
-	        lady->config->cfg_ladybug_colorProcessing == LADYBUG_MONO)
-        {
-	        uiRawCols = image.uiCols / 2;
-	        uiRawRows = image.uiRows / 2;
-        }else{
-	        uiRawCols = image.uiCols;
-	        uiRawRows = image.uiRows;
-        }
-    }else if(seperatedColors){
-        uiRawCols = image.uiFullCols / 2;
-	    uiRawRows = image.uiFullRows / 2;
-    }
-    else{
-        uiRawCols = image.uiFullCols;
-        uiRawRows = image.uiFullRows;
-    }     
+    
+    uiRawCols = image.uiFullCols / 2;
+	uiRawRows = image.uiFullRows / 2;
+  
 	_TIME
     
     std::string connection;
     int socket_type = ZMQ_PUB;
     bool zmq_bind = false;
-
-    if( lady->config->cfg_transfer_compressed && (lady->config->cfg_rectification || cfg_panoramic)){
-        connection = zmq_uncompressed;
-        socket_type = ZMQ_PUSH;
-        zmq_bind = true;
-            
-        for(unsigned int i=0; i < boost::thread::hardware_concurrency(); ++i){
-        	threads.create_thread(std::bind(compressionThread, zmq_context, i)); //worker thread (jpg-compression)
-        }
-        threads.create_thread(std::bind(sendingThread, zmq_context));
-    }else{
-        connection = cfg_ros_master.c_str();
-    }
+ 
+    connection = cfg_ros_master.c_str();
 
     status = "connect with zmq to " + connection;
 
@@ -106,10 +101,10 @@ GrabSend::GrabSend(zmq::context_t* zmq_context){
         position[uiCamera].set_ty(calib.translationY);
         position[uiCamera].set_tz(calib.translationZ);
             
-        disortion[uiCamera].set_centerx(calib.centerX);
-        disortion[uiCamera].set_centery(calib.centerY);
-        disortion[uiCamera].set_focalx(calib.focal_lenght);
-        disortion[uiCamera].set_focaly(calib.focal_lenght);
+        disortion[uiCamera].set_centerx(calib.centerX/2);
+        disortion[uiCamera].set_centery(calib.centerY/2);
+        disortion[uiCamera].set_focalx(calib.focal_lenght/2); //TODO: Check it thats right??
+        disortion[uiCamera].set_focaly(calib.focal_lenght/2);
         _TIME
     }
 
@@ -123,109 +118,113 @@ GrabSend::GrabSend(zmq::context_t* zmq_context){
 int
 GrabSend::loop(){
     while(!stop){
-	    double loopstart = t_now = clock();
-	    t_now = loopstart;
+		try{
+			double loopstart = t_now = clock();
+			t_now = loopstart;
 
-	    // Grab an image from the camera
-	    std::string status = "grab image";
+			// Grab an image from the camera
+			std::string status = "grab image";
 
-	    /* Get ladybugImage */
-        lady->grabImage(&image);
-	    _HANDLE_ERROR_LADY
-	    _TIME
+			/* Get ladybugImage */
+			lady->grabImage(&image);
+			_HANDLE_ERROR_LADY
+			_TIME
 
-		prefill_sensordata(message, image); 
+			prefill_sensordata(message, image); 
    
-
-        for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
-	    {
-		    ladybug5_network::pbImage* image_msg = 0;
-		    image_msg = message.add_images();
-		    image_msg->set_type((ladybug5_network::ImageType) ( 1 << uiCamera));
-		    image_msg->set_name(enumToString(image_msg->type()));
-		    image_msg->set_height(uiRawRows);
-            image_msg->set_width(uiRawCols);
-            image_msg->set_allocated_distortion(new ladybug5_network::pbDisortion(disortion[uiCamera]));
-            image_msg->set_allocated_position(new ladybug5_network::pbPosition(position[uiCamera]));
-            image_msg->set_packages(1);
-
-            if( !seperatedColors){
-                if(!lady->config->cfg_rectification){ // rectified images dont have a border
-                    image_msg->set_border_left(image.imageBorder.uiLeftCols);
-                    image_msg->set_border_right(image.imageBorder.uiRightCols);
-                    image_msg->set_border_top(image.imageBorder.uiTopRows);
-                    image_msg->set_border_bottem(image.imageBorder.uiBottomRows);
-                }
-            }else{
-                image_msg->set_packages(3);
-                image_msg->set_border_left(image.imageBorder.uiLeftCols/2);
-                image_msg->set_border_right(image.imageBorder.uiRightCols/2);
-                image_msg->set_border_top(image.imageBorder.uiTopRows/2);
-                image_msg->set_border_bottem(image.imageBorder.uiBottomRows/2);
-            }
-        }
-
-        //send protobuff message
-        pb_send(socket, &message, ZMQ_SNDMORE); 
-
-        status = "extract images " + std::to_string(nr);
-        int flag = ZMQ_SNDMORE;
-
-        for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
-        {
-			if( uiCamera == LADYBUG_NUM_CAMERAS-1 ){
-                    flag = 0;
-            }
-
-            if(seperatedColors)
-            {
-                unsigned int index = uiCamera*4;
-                //send images 
-                     
-                //RGB expected at reciever
-				// Red = Index + 3
-				send_image(index+red_offset, &image, socket, flag);
-
-				// Green = Index + 1 || 2
-				send_image(index+green_offset, &image, socket, flag);
-
-				// Blue = Index 0
-        		send_image(index+blue_offset, &image, socket, flag);
-                        
-            }else{ /* RGGB RAW */
-				send_image(uiCamera, &image, socket, flag);
-            }
-        } // end uiCamera loop
-
-        message.Clear();
-        ++nr;
-	    
-        socket_watchdog->send(msg_watchdog, ZMQ_NOBLOCK); // Loop done
+			for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
+			{
+				ladybug5_network::pbImage* image_msg = 0;
+				image_msg = message.add_images();
+				image_msg->set_type((ladybug5_network::ImageType) ( 1 << uiCamera));
+				image_msg->set_name(enumToString(image_msg->type()));
+				image_msg->set_height(uiRawRows);
+				image_msg->set_width(uiRawCols);
+				image_msg->set_allocated_distortion(new ladybug5_network::pbDisortion(disortion[uiCamera]));
+				image_msg->set_allocated_position(new ladybug5_network::pbPosition(position[uiCamera]));
         
-        if(lady->isFileStream()){
-            double sleepTime = lady->getCycleTime() - (clock() - loopstart) -1;
-            if(sleepTime > 0){
-                Sleep(sleepTime);
-            }
-        }
-        else{
-            Sleep(1); // Chance to terminate the thread
-        }
-        status = "Sum loop";
-	    t_now = loopstart;
-        _TIME
-    }
-    return 0;
+				image_msg->set_packages(3);
+				image_msg->set_border_left(image.imageBorder.uiLeftCols/2);
+				image_msg->set_border_right(image.imageBorder.uiRightCols/2);
+				image_msg->set_border_top(image.imageBorder.uiTopRows/2);
+				image_msg->set_border_bottem(image.imageBorder.uiBottomRows/2);
+			}
+
+			//send protobuff message
+			pb_send(socket, &message, ZMQ_SNDMORE); 
+
+			status = "extract images " + std::to_string(nr);
+			int flag = ZMQ_SNDMORE;
+
+			for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
+			{
+				if( uiCamera == LADYBUG_NUM_CAMERAS-1 ){
+						flag = 0;
+				}
+
+				if(seperatedColors)
+				{
+					unsigned int index = uiCamera*4;
+					//send images 
+                     
+					//RGB expected at reciever
+					// Red = Index + 3
+					send_image(index+red_offset, &image, socket, flag);
+
+					// Green = Index + 1 || 2
+					send_image(index+green_offset, &image, socket, flag);
+
+					// Blue = Index 0
+        			send_image(index+blue_offset, &image, socket, flag);
+                        
+				}else{ /* RGGB RAW */
+					send_image(uiCamera, &image, socket, flag);
+				}
+			} // end uiCamera loop
+
+			message.Clear();
+			++nr;
+	    
+			socket_watchdog->send(msg_watchdog, ZMQ_NOBLOCK); // Loop done
+        
+			if(lady->isFileStream()){
+				double sleepTime = lady->getCycleTime() - (clock() - loopstart) -1;
+				if(sleepTime > 0){
+					Sleep(sleepTime);
+				}
+			}
+			else{
+				Sleep(1); // Chance to terminate the thread
+			}
+			status = "Sum loop";
+			t_now = loopstart;
+			_TIME
+		}
+		catch(std::exception e){
+			stop = true;
+		}
+	}
+	return 0;
+	
 _EXIT:
     return 1;
 }
 
 GrabSend::~GrabSend(){
     stop = true;
-    socket->close();
-    delete socket;
-    socket_watchdog->close();
-    delete socket_watchdog;
-    threads.interrupt_all();
-    delete lady;
+	Sleep(500);
+
+	if(socket != NULL) 
+	{
+		socket->close();
+		delete socket;
+	}
+
+	if(socket_watchdog != NULL) 
+	{
+		socket_watchdog->close();
+		delete socket_watchdog;
+	}
+	
+	if(lady != NULL) delete lady;
 }
