@@ -27,7 +27,6 @@
     }
 #endif
 
-
 struct CameraCalibration{
     double rotationX,rotationY,rotationZ,translationX,translationY,translationZ;
     double focal_lenght; 
@@ -65,7 +64,8 @@ public:
 
 class Ladybug{
 public:
-    Ladybug(Configuration* config = NULL);
+    Ladybug();
+	void init(Configuration* config = NULL);
     ~Ladybug();
     LadybugError grabImage(LadybugImage* image);
     LadybugError grabProcessedImage(LadybugProcessedImage* image, LadybugOutputImage imageType);
@@ -78,7 +78,6 @@ public:
     bool isFileStream();
     double getCycleTime();
 private:
-    void init();
     LadybugStream* _stream;
     ArpBuffer* _buffer;
     LadybugImage _raw_image;

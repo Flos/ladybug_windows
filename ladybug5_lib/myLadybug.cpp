@@ -75,24 +75,17 @@ ArpBuffer::~ArpBuffer(){
     }
 };
 
-void
-Ladybug::init(){
-    _buffer = NULL;
-    _stream = NULL;
-    images_processed = false;
-    initialised_processing = false;
-    error = ladybugCreateContext( &context );
-    _ERROR_NORETURN
-}
+void 
+Ladybug::init(Configuration* config){
 
-Ladybug::Ladybug(Configuration* config){
-    if(config == NULL){
+	if(config == NULL){
         this->config = new Configuration();
     }else{
         this->config = new Configuration(*config);
     }
     
-    init();
+    error = ladybugCreateContext( &context );
+	_ERROR_NORETURN
 
     if(this->config->cfg_fileStream.empty()){
         error = initCamera();
@@ -100,9 +93,20 @@ Ladybug::Ladybug(Configuration* config){
     else{
         error = initStream(this->config->cfg_fileStream);
     }
-    _ERROR_NORETURN
+	if( error != LADYBUG_OK ) 
+	{     
+		throw new std::exception(::ladybugErrorToString( error ));
+	}
     error = start();
     _ERROR_NORETURN
+}
+
+
+Ladybug::Ladybug(){
+    _buffer = NULL;
+    _stream = NULL;
+    images_processed = false;
+    initialised_processing = false;
 };
 
 LadybugError 
