@@ -21,28 +21,32 @@ void main( int argc, char* argv[] ){
     
     //Test
     GrabSend* grabSend = NULL;
-    boost::thread* ladybug_grabber = NULL;
+    //boost::thread* ladybug_grabber = NULL;
+	boost::shared_ptr<boost::thread> ladybug_grabber = NULL; //(new boost::thread(&do_work));
 
     zmq::message_t msg;
     while(true){
         try{
             if(!socket_watchdog->recv(&msg, ZMQ_NOBLOCK) || grabSend == NULL || grabSend->stop){
-                if( grabSend != NULL ){
+                 if( ladybug_grabber != NULL){
+					grabSend->stop = true;
+					ladybug_grabber->join();
+                }
+
+				if( grabSend != NULL ){
                     delete grabSend;
-                    Sleep(2000);
                 }
-                if( ladybug_grabber != NULL){
-                    ladybug_grabber->interrupt();
-                    delete ladybug_grabber;
-                    Sleep(2000);
-                }
-                grabSend = new GrabSend(zmq_context);
-                ladybug_grabber = new boost::thread(&GrabSend::loop, grabSend);
+               
+				Sleep(3000);
+                grabSend = new GrabSend();
+				grabSend->init(zmq_context);
+
+				ladybug_grabber = boost::shared_ptr<boost::thread>(new boost::thread(&GrabSend::loop, grabSend));
             }
-        }catch(std::exception e){
-            std::printf("Exception, restarting!\n");
+		}catch(...){
+			std::printf("Catched unknown Exception, restarting!\n\n");
         }
-        Sleep(5000);
+        Sleep(500);
     }
 
 	std::printf("<PRESS ANY KEY TO EXIT>");
