@@ -9,6 +9,7 @@ class Config
 public:
 	Config(void);
 	void load(std::string filename="watchdog.ini");
+	void create_default();
     void save();
 
 	void put_path(std::string key, std::string path);

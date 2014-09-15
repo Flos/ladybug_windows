@@ -9,7 +9,14 @@ Config::Config(void)
 void
 Config::load(std::string filename){
 	config_file = filename;
-	boost::property_tree::ini_parser::read_ini(config_file, pt);
+	try
+	{
+		boost::property_tree::ini_parser::read_ini(config_file, pt);
+	}
+	catch (boost::exception &e){
+		printf("Ini parsing failed: %s\nCreating new ini file.", e);
+		create_default();
+	}
 }
 
 void
@@ -57,4 +64,27 @@ Config::to_string(){
 	std::stringstream ss;
 	boost::property_tree::write_json(ss, pt);
 	return ss.str();
+}
+
+void
+Config::create_default(){
+	
+	put("watchdog.socket","tcp://*:28883");
+	put("watchdog.autostart","jpg_raw");	
+
+	put_path("jpg_raw","..\\bin\\grabber_x64_Release.exe");
+	put_path("panoramic","..\\bin\\panoramic_x64_Release.exe");
+	put_path("calibration","..\\bin\\export_distCoeffs_x64_Release.exe");
+	put_path("full_processing","..\\bin\\full_processing_x64_Release.exe");
+
+	put_path("debug_jpg_raw","..\\bin\\grabber_x64_Debug.exe");
+	put_path("debug_panoramic","..\\bin\\panoramic_x64_Debug.exe");
+	put_path("debug_calibration","..\\bin\\export_distCoeffs_x64_Debug.exe");
+	put_path("debug_full_processing","..\\bin\\full_processing_x64_Debug.exe");
+	
+	put_path("shutdown","C:\\Windows\\System32\\shutdown.exe");
+	put_args("shutdown","/s");
+	put_path("restart","C:\\Windows\\System32\\shutdown.exe");
+	put_args("restart","/r");
+	save();
 }
