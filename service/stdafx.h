@@ -28,7 +28,6 @@
 // Other Includes
 //=============================================================================
 #include <zmq.hpp>
-#include <watchdog.pb.h>
 #include <imageMessage.pb.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/message.h>
