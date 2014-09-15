@@ -25,9 +25,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "protobuf", "protobuf", "{3E
 		protobuf\imageMessage.proto = protobuf\imageMessage.proto
 		protobuf\Makefile.txt = protobuf\Makefile.txt
 		protobuf\README.md = protobuf\README.md
-		protobuf\watchdog.pb.cc = protobuf\watchdog.pb.cc
-		protobuf\watchdog.pb.h = protobuf\watchdog.pb.h
-		protobuf\watchdog.proto = protobuf\watchdog.proto
 	EndProjectSection
 EndProject
 Global
@@ -107,6 +104,7 @@ Global
 		{075BD3B4-B2B4-48BB-A103-1284607DD0F0}.Debug|Mixed Platforms.Build.0 = Debug|x64
 		{075BD3B4-B2B4-48BB-A103-1284607DD0F0}.Debug|Win32.ActiveCfg = Debug|x64
 		{075BD3B4-B2B4-48BB-A103-1284607DD0F0}.Debug|x64.ActiveCfg = Debug|x64
+		{075BD3B4-B2B4-48BB-A103-1284607DD0F0}.Debug|x64.Build.0 = Debug|x64
 		{075BD3B4-B2B4-48BB-A103-1284607DD0F0}.Release|Any CPU.ActiveCfg = Release|x64
 		{075BD3B4-B2B4-48BB-A103-1284607DD0F0}.Release|Mixed Platforms.ActiveCfg = Release|x64
 		{075BD3B4-B2B4-48BB-A103-1284607DD0F0}.Release|Mixed Platforms.Build.0 = Release|x64
@@ -118,6 +116,7 @@ Global
 		{58B44A7B-4303-49CE-B9E8-506ECAFECFC0}.Debug|Mixed Platforms.Build.0 = Debug|x64
 		{58B44A7B-4303-49CE-B9E8-506ECAFECFC0}.Debug|Win32.ActiveCfg = Debug|x64
 		{58B44A7B-4303-49CE-B9E8-506ECAFECFC0}.Debug|x64.ActiveCfg = Debug|x64
+		{58B44A7B-4303-49CE-B9E8-506ECAFECFC0}.Debug|x64.Build.0 = Debug|x64
 		{58B44A7B-4303-49CE-B9E8-506ECAFECFC0}.Release|Any CPU.ActiveCfg = Release|x64
 		{58B44A7B-4303-49CE-B9E8-506ECAFECFC0}.Release|Mixed Platforms.ActiveCfg = Release|x64
 		{58B44A7B-4303-49CE-B9E8-506ECAFECFC0}.Release|Mixed Platforms.Build.0 = Release|x64
