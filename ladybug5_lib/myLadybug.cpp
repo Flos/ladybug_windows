@@ -79,9 +79,9 @@ void
 Ladybug::init(Configuration* config){
 
 	if(config == NULL){
-        this->config = new Configuration();
+        this->config = config;
     }else{
-        this->config = new Configuration(*config);
+        this->config = config;
     }
     
     error = ladybugCreateContext( &context );
@@ -92,11 +92,15 @@ Ladybug::init(Configuration* config){
     }
     else{
         error = initStream(this->config->cfg_fileStream);
+
+		//Read information form stream back to config
+		this->config->cfg_ladybug_dataformat = _stream->streamHeadInfo.dataFormat;
     }
 	if( error != LADYBUG_OK ) 
 	{     
 		throw new std::exception(::ladybugErrorToString( error ));
 	}
+	
     error = start();
     _ERROR_NORETURN
 }
@@ -337,6 +341,5 @@ Ladybug::getBuffer(){
 Ladybug::~Ladybug(){
     ladybugDestroyContext( &context);
     if(_stream != NULL) delete _stream;
-    if(config != NULL) delete config;
     if(_buffer != NULL) delete _buffer;
 }
