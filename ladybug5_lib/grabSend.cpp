@@ -5,19 +5,17 @@ GrabSend::GrabSend(){
     socket_watchdog = NULL;
     uiRawCols = 0;
     uiRawRows = 0;
-    seperatedColors = false;
+    separatedColors = false;
     stop = false;
 	lady = NULL;
-
+	nr = 0;
     
 
 }
 
 void
 GrabSend::init(zmq::context_t* zmq_context)
-{
-	Configuration config;
-
+{	
 	if(config.cfg_panoramic){
 		config.cfg_panoramic=false;
 		printf("Warning: panoramic image creation not supported in grabber...\n");
@@ -28,19 +26,10 @@ GrabSend::init(zmq::context_t* zmq_context)
 		printf("Warning: compressed image transfer is not supported in grabber...\n");
 	}
 
-	if(config.cfg_ladybug_dataformat != LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG8 
-		|| config.cfg_ladybug_dataformat != LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8
-		|| config.cfg_ladybug_dataformat != LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG12
-		|| config.cfg_ladybug_dataformat != LADYBUG_DATAFORMAT_COLOR_SEP_JPEG12
-		){
-		config.cfg_ladybug_dataformat = LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8;
-		printf("Warning: only jpeg color seperated dataformats are supported...\n");
-	}
-
 	lady = new Ladybug();
 	lady->init(&config);
-   
-     //-----------------------------------------------
+
+    //-----------------------------------------------
     //create watchdog
     //-----------------------------------------------
     int val_watchdog = 1;
@@ -52,19 +41,25 @@ GrabSend::init(zmq::context_t* zmq_context)
 
     lady->grabImage(&image);
    
-    seperatedColors = isColorSeperated(&image);
-    if(seperatedColors){
+    separatedColors = isColorSeparated(&image);
+	bayer_encoding = getBayerEncoding(&image) +  std::to_string(lady->config->get_image_depth());
+	color_encoding = lady->config->get_color_encoding();
+
+	printf("Sending color: %s bayer: %s depth: %ibit\n", color_encoding.c_str(), bayer_encoding.c_str(), lady->config->get_image_depth());
+
+    if(separatedColors){
         getColorOffset(&image, red_offset, green_offset, blue_offset);
+		uiRawCols = image.uiFullCols / 2;
+		uiRawRows = image.uiFullRows / 2;
     }
 	else{
-		throw new std::exception("only jepeg color sep images are supported in grabber");
+		//printf("Exception: only jepeg color sep images are supported in grabber\n");
+		//throw new std::exception("only jepeg color sep images are supported in grabber");
+
+		uiRawCols = image.uiFullCols;
+		uiRawRows = image.uiFullRows;
 	}
-	
-	// Set the size of the image to be processed
-    
-    uiRawCols = image.uiFullCols / 2;
-	uiRawRows = image.uiFullRows / 2;
-  
+
 	_TIME
     
     std::string connection;
@@ -106,6 +101,31 @@ GrabSend::init(zmq::context_t* zmq_context)
         disortion[uiCamera].set_focalx(calib.focal_lenght/2); //TODO: Check it thats right??
         disortion[uiCamera].set_focaly(calib.focal_lenght/2);
         _TIME
+
+		ladybug5_network::pbImage* image_msg = 0;
+		image_msg = message.add_images();
+		image_msg->set_type((ladybug5_network::ImageType) ( 1 << uiCamera));
+		image_msg->set_name(enumToString(image_msg->type()));
+		image_msg->set_height(uiRawRows);
+		image_msg->set_width(uiRawCols);
+		image_msg->set_allocated_distortion(new ladybug5_network::pbDisortion(disortion[uiCamera]));
+		image_msg->set_allocated_position(new ladybug5_network::pbPosition(position[uiCamera]));
+        
+		image_msg->set_border_left(image.imageBorder.uiLeftCols/2);
+		image_msg->set_border_right(image.imageBorder.uiRightCols/2);
+		image_msg->set_border_top(image.imageBorder.uiTopRows/2);
+		image_msg->set_border_bottem(image.imageBorder.uiBottomRows/2);
+		image_msg->set_color_encoding(color_encoding);
+		image_msg->set_bayer_encoding(bayer_encoding);
+		image_msg->set_depth(lady->config->get_image_depth());
+
+		if(separatedColors){
+			image_msg->set_packages(3);
+		}
+		else{
+			image_msg->set_packages(1);
+		}
+		_TIME
     }
 
     unsigned int nr = 0;
@@ -117,41 +137,32 @@ GrabSend::init(zmq::context_t* zmq_context)
 
 int
 GrabSend::loop(){
+	std::string status = "loop init";
+	double loopstart;	
+	
     while(!stop){
 		try{
-			double loopstart = t_now = clock();
+			loopstart = t_now = clock();
 			t_now = loopstart;
 
 			// Grab an image from the camera
-			std::string status = "grab image";
-
+			status = "wait for image";
+			_TIME
 			/* Get ladybugImage */
 			lady->grabImage(&image);
 			_HANDLE_ERROR_LADY
+			// Grab an image from the camera
+			status = "got images";
 			_TIME
 
 			prefill_sensordata(message, image); 
-   
-			for( unsigned int uiCamera = 0; uiCamera < LADYBUG_NUM_CAMERAS; uiCamera++ )
-			{
-				ladybug5_network::pbImage* image_msg = 0;
-				image_msg = message.add_images();
-				image_msg->set_type((ladybug5_network::ImageType) ( 1 << uiCamera));
-				image_msg->set_name(enumToString(image_msg->type()));
-				image_msg->set_height(uiRawRows);
-				image_msg->set_width(uiRawCols);
-				image_msg->set_allocated_distortion(new ladybug5_network::pbDisortion(disortion[uiCamera]));
-				image_msg->set_allocated_position(new ladybug5_network::pbPosition(position[uiCamera]));
-        
-				image_msg->set_packages(3);
-				image_msg->set_border_left(image.imageBorder.uiLeftCols/2);
-				image_msg->set_border_right(image.imageBorder.uiRightCols/2);
-				image_msg->set_border_top(image.imageBorder.uiTopRows/2);
-				image_msg->set_border_bottem(image.imageBorder.uiBottomRows/2);
-			}
+			status = "get sensordata";
+			_TIME
 
 			//send protobuff message
 			pb_send(socket, &message, ZMQ_SNDMORE); 
+			status = "send header";
+			_TIME
 
 			status = "extract images " + std::to_string(nr);
 			int flag = ZMQ_SNDMORE;
@@ -162,7 +173,7 @@ GrabSend::loop(){
 						flag = 0;
 				}
 
-				if(seperatedColors)
+				if(separatedColors)
 				{
 					unsigned int index = uiCamera*4;
 					//send images 
@@ -182,7 +193,8 @@ GrabSend::loop(){
 				}
 			} // end uiCamera loop
 
-			message.Clear();
+			_TIME
+			//message.Clear();
 			++nr;
 	    
 			socket_watchdog->send(msg_watchdog, ZMQ_NOBLOCK); // Loop done

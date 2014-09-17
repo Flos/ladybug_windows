@@ -44,9 +44,23 @@ void getColorOffset(LadybugImage *image, unsigned int& red_idx_offset, unsigned 
     }
 }
 
+std::string getBayerEncoding(LadybugImage *image){
+	switch(image->stippledFormat){
+    case LADYBUG_BGGR:
+       return "BGGR";
+    case LADYBUG_GBRG:
+        return "GBRG";
+    case LADYBUG_GRBG:
+        return "GRBG";
+    case LADYBUG_RGGB:
+        return "RGGB";
+    default:
+        return "none";
+    }
+}
 void extractImagesToFiles(LadybugImage* image){
     unsigned int imgCount = getImageCount(image); /* every channel as jpg */
-    if(isColorSeperated(image)){
+    if(isColorSeparated(image)){
         jpgPositionAndSize* jpg = new jpgPositionAndSize[imgCount];
         for(unsigned int i=0x0340, j = 0 ; j < imgCount; i=i+8, j++){ /* extract jpg offsets and sizes from LadybugImage */
             unsigned int offset = *(unsigned int*)&image->pData[i];
@@ -78,7 +92,7 @@ void extractImagesToFiles(LadybugImage* image){
 
 void extractImageToMsg(LadybugImage* image, unsigned int i, char** begin, unsigned int& size){
     unsigned int imgCount = getImageCount(image);
-    if(isColorSeperated(image))
+    if(isColorSeparated(image))
     {
         jpgPositionAndSize jpg;
         unsigned int offset = 0x0340 + i*8;
@@ -92,11 +106,9 @@ void extractImageToMsg(LadybugImage* image, unsigned int i, char** begin, unsign
         return;
     }
     else{
-        //for 8 bit only BGGR
         unsigned int resolution = image->uiFullCols*image->uiFullRows;
-        unsigned int imagesize = resolution;
+        unsigned int imagesize = (double)resolution * ((double)getDataBitDepth(image)/8);
         unsigned int offset = imagesize*i;
-        //unsigned int dataDepth = getDataBitDepth(image);
 
         *begin = (char*)&image->pData[offset];
         size =  imagesize;
@@ -124,7 +136,7 @@ unsigned int getDataBitDepth(LadybugImage* image){
      }
 }
 
-bool isColorSeperated(LadybugImage* image){
+bool isColorSeparated(LadybugImage* image){
     switch(image->dataFormat){
         case LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG12:
         case LADYBUG_DATAFORMAT_COLOR_SEP_JPEG12:

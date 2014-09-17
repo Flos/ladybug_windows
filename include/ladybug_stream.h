@@ -8,7 +8,8 @@
 
 unsigned int getDataBitDepth(LadybugImage* image);
 unsigned int getImageCount(LadybugImage* image);
-bool isColorSeperated(LadybugImage* image);
+bool isColorSeparated(LadybugImage* image);
+std::string getBayerEncoding(LadybugImage *image);
 void extractImagesToFiles(LadybugImage* image);
 void extractImageToMsg(LadybugImage* image, unsigned int i, char** begin, unsigned int& size);
 void openPgrFile(char* filename);
