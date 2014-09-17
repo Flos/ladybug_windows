@@ -28,7 +28,7 @@ _RESTART:
     bool filestream = lady->config->cfg_fileStream.size() > 0;
     bool done = false;
  
-    bool seperatedColors = false;
+    bool separatedColors = false;
     unsigned int red_offset,green_offset,blue_offset;
 
     //-----------------------------------------------
@@ -37,8 +37,8 @@ _RESTART:
     unsigned int sleepTime = 0;
 	_TIME
 
-     seperatedColors = isColorSeperated(&image);
-     if(seperatedColors || !lady->config->cfg_transfer_compressed){
+     separatedColors = isColorSeparated(&image);
+     if(separatedColors || !lady->config->cfg_transfer_compressed){
          getColorOffset(&image, red_offset, green_offset, blue_offset);
      }
 	_TIME
@@ -172,7 +172,7 @@ _RESTART:
                     image_msg->set_width(uiRawCols);
                     image_msg->set_allocated_distortion(new ladybug5_network::pbDisortion(disortion[uiCamera]));
                     image_msg->set_allocated_position(new ladybug5_network::pbPosition(position[uiCamera]));
-                    if(seperatedColors && !lady->config->cfg_ladybug_colorProcessing && !lady->config->cfg_panoramic){
+                    if(separatedColors && !lady->config->cfg_ladybug_colorProcessing && !lady->config->cfg_panoramic){
                         image_msg->set_packages(3);
                     }else{
                         image_msg->set_packages(1);
@@ -249,7 +249,7 @@ _RESTART:
                             flag = 0;
                         }
 
-                        if(seperatedColors){
+                        if(separatedColors){
 
                             //RGB expected at reciever
                             zmq::message_t R(r_size);

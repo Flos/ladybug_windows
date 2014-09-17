@@ -17,7 +17,7 @@ _RESTART:
     bool filestream = cfg_fileStream.size() > 0;
     bool done = false;
  
-    bool seperatedColors = false;
+    bool separatedColors = false;
     unsigned int red_offset,green_offset,blue_offset;
 
     //-----------------------------------------------
@@ -116,8 +116,8 @@ _RESTART:
 	_HANDLE_ERROR
 	_TIME
 
-    seperatedColors = isColorSeperated(&image);
-    if(seperatedColors || !cfg_transfer_compressed){
+    separatedColors = isColorSeparated(&image);
+    if(separatedColors || !cfg_transfer_compressed){
         getColorOffset(&image, red_offset, green_offset, blue_offset);
     }
 	
@@ -141,7 +141,7 @@ _RESTART:
 
 	    arpBufferSize = initBuffers(arpBuffers, LADYBUG_NUM_CAMERAS, uiRawCols, uiRawRows, 4);
 
-    }else if(seperatedColors){
+    }else if(separatedColors){
         uiRawCols = image.uiFullCols / 2;
 	    uiRawRows = image.uiFullRows / 2;
     }
@@ -299,7 +299,7 @@ _RESTART:
                     image_msg->set_packages(1);
 
                     if( !cfg_postprocessing && !cfg_panoramic){
-                        if( !seperatedColors){
+                        if( !separatedColors){
                             image_msg->set_border_left(image.imageBorder.uiLeftCols);
                             image_msg->set_border_right(image.imageBorder.uiRightCols);
                             image_msg->set_border_top(image.imageBorder.uiTopRows);
@@ -403,7 +403,7 @@ _RESTART:
                             flag = 0;
                         }
 
-                        if(seperatedColors){
+                        if(separatedColors){
 
                             //RGB expected at reciever
                             zmq::message_t R(r_size);

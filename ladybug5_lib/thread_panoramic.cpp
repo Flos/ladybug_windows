@@ -19,7 +19,7 @@ _RESTART:
 	bool filestream = cfg_fileStream.size() > 0;
     bool done = false;
  
-    bool seperatedColors = false;
+    bool separatedColors = false;
     unsigned int red_offset,green_offset,blue_offset;
 
 
@@ -109,8 +109,8 @@ _RESTART:
 	_HANDLE_ERROR
 	_TIME
 
-    seperatedColors = isColorSeperated(&image);
-	if(seperatedColors || !cfg_transfer_compressed){
+    separatedColors = isColorSeparated(&image);
+	if(separatedColors || !cfg_transfer_compressed){
         getColorOffset(&image, red_offset, green_offset, blue_offset);
     }
 	
