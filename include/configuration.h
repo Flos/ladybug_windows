@@ -31,6 +31,10 @@ public:
     void load(std::string filename="config.ini");
     void save(std::string filename="config.ini");
     void saveOptions(std::string filename="config.ini.options.txt");
+	int get_image_depth();
+	bool is_jpg();
+	bool is_color_separated();
+	std::string get_color_encoding();
     ~Configuration();
 private:
     void init();

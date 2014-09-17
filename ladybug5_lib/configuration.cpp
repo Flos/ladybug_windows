@@ -59,5 +59,73 @@ Configuration::save(std::string filename){
     boost::property_tree::ini_parser::write_ini(cfg_configFile.c_str(), pt);
 }
 
+int 
+Configuration::get_image_depth(){
+	switch(cfg_ladybug_dataformat){
+        case LADYBUG_DATAFORMAT_RAW8:
+        case LADYBUG_DATAFORMAT_COLOR_SEP_RAW8:
+        case LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW8:
+		case LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8:
+		case LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG8:
+		case LADYBUG_DATAFORMAT_JPEG8:
+            return 8;
+            break;
+        case LADYBUG_DATAFORMAT_RAW12:
+        case LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW12:
+		case LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG12:
+		case LADYBUG_DATAFORMAT_COLOR_SEP_JPEG12:
+            return 12;
+            break;
+        case LADYBUG_DATAFORMAT_RAW16:
+        case LADYBUG_DATAFORMAT_HALF_HEIGHT_RAW16:
+            return 16;
+            break;
+        default:
+            throw new std::exception("bit size can not be dettermined");
+    }
+}
+
+
+bool 
+Configuration::is_color_separated(){
+    switch(cfg_ladybug_dataformat){
+        case LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG12:
+        case LADYBUG_DATAFORMAT_COLOR_SEP_JPEG12:
+        case LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG8:
+        case LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8:
+		case LADYBUG_DATAFORMAT_COLOR_SEP_RAW8:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool 
+Configuration::is_jpg(){
+    switch(cfg_ladybug_dataformat){
+        case LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG12:
+        case LADYBUG_DATAFORMAT_COLOR_SEP_JPEG12:
+        case LADYBUG_DATAFORMAT_COLOR_SEP_HALF_HEIGHT_JPEG8:
+        case LADYBUG_DATAFORMAT_COLOR_SEP_JPEG8:
+		case LADYBUG_DATAFORMAT_JPEG8:
+            return true;
+        default:
+            return false;
+    }
+}
+
+std::string 
+Configuration::get_color_encoding(){
+	std::stringstream ss;
+	if(is_jpg()){
+		ss << "jpg";
+	}
+	else{
+		ss << "raw";
+	}
+	ss << get_image_depth();
+	return ss.str();
+}
+
 Configuration::~Configuration(){
 }
