@@ -44,7 +44,10 @@ Watchdog_service::handle_zmq(){
 		//Got a message to handle
 
 		printf("Received: %s\n", pb_msg.DebugString().c_str());
+
+		config.load(); //Reload config
 		handle_message(pb_msg);
+
 		printf("handeling sending");
 
 		//pb_msg.Clear();
@@ -87,7 +90,7 @@ Watchdog_service::handle_message(ladybug5_network::pb_start_msg &message){
 		reply_msg.set_success(false);
 		std::string info_txt = "Path for key \"" + message.name() +"\" not found.\n\nAvailable in "+ config.config_file + ":\n" + config.to_string();
 		reply_msg.set_info(info_txt);
-		printf("Path for key \"%s\" not found", message.name() );
+		printf("Path for key \"%s\" not found\n", message.name() );
 		
 		zmq_service.send(reply_msg);
 	}
@@ -102,11 +105,12 @@ Watchdog_service::handle_message(ladybug5_network::pb_start_msg &message){
 
 		//update config to autostart it next time
 		config.put(key_autostart, message_name);
-		if( message.command() == ladybug5_network::DONTSAVE
-			|| message.name() == "reboot"
-			|| message.name() == "shutdown") 
-			config.save();
-
+		if( message.command() != ladybug5_network::DONTSAVE
+			|| message.name() != "reboot"
+			|| message.name() != "shutdown"
+			){
+				config.save();	// remember current state
+		}			
 		//activate new process
 		std::string key = config.get(key_autostart);
 
