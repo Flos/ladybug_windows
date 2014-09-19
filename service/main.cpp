@@ -17,12 +17,12 @@ void test_zmq(){
 	ladybug5_network::pb_start_msg pb_msg;
 	pb_msg.set_name("pano");	
 	
-	zmq.send(&pb_msg);
+	zmq.send(pb_msg);
 	
 	service.handle_zmq();
 
 	ladybug5_network::pb_reply pb_reply;
-	zmq.receive(&pb_reply);
+	zmq.receive(pb_reply);
 
 	printf("Received: %s\n", pb_reply.SerializeAsString());
 }
