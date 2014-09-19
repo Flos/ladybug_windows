@@ -34,9 +34,7 @@ MyProcess::MyProcess(std::string executable, std::string arguments)
 	id_thread = 0;
 	id_process = 0;
 
-	printf("Creating MyProcess object %s\n\
-			path: %s, args: %s\n\
-			path: %s, args: %s.\n", 
+	printf("Process: %s\npath: %s, args: %s\npath: %s, args: %s.\n", 
 			name, 
 			executable.c_str(), arguments.c_str(), 
 			path, args);
