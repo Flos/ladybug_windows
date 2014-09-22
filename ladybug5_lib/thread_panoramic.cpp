@@ -239,6 +239,14 @@ _RESTART:
                 image_msg->set_border_bottem(0);
 				image_msg->set_packages(1);
 				image_msg->set_bayer_encoding("BGR8");
+				if(cfg_transfer_compressed){
+					image_msg->set_color_encoding("jpg");
+				}
+				else{
+					image_msg->set_color_encoding("raw");
+				}
+				image_msg->set_depth(getDataBitDepth(&image));
+
 
                 pb_send(socket, &message, ZMQ_SNDMORE);
 
