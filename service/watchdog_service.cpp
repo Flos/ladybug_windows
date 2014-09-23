@@ -106,8 +106,9 @@ Watchdog_service::handle_message(ladybug5_network::pb_start_msg &message){
 		//update config to autostart it next time
 		config.put(key_autostart, message_name);
 		if( message.command() != ladybug5_network::DONTSAVE
-			|| message.name() != "reboot"
-			|| message.name() != "shutdown"
+			&& message.name() != "reboot"
+			&& message.name() != "restart"
+			&& message.name() != "shutdown"
 			){
 				config.save();	// remember current state
 		}			
