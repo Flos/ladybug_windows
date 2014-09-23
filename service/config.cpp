@@ -1,6 +1,4 @@
-#include "stdafx.h"
 #include "config.h"
-
 
 Config::Config(void)
 {

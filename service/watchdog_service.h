@@ -1,4 +1,7 @@
 #pragma once
+#include "zmq_service.h"
+#include "MyProcess.h"
+#include "config.h"
 
 class Watchdog_service
 {

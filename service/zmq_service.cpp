@@ -1,5 +1,4 @@
 #include "zmq_service.h"
-#include "stdafx.h"
 
 Zmq_service::Zmq_service(void)
 {

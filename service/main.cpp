@@ -1,6 +1,7 @@
 // service.cpp: Hauptprojektdatei.
 
 #include "stdafx.h"
+#include "watchdog_service.h"
 
 void test_zmq(){
 	Watchdog_service service;

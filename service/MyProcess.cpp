@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "MyProcess.h"
 
 using namespace System;

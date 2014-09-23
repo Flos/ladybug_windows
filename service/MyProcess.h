@@ -1,4 +1,9 @@
 #pragma once
+#include "stdafx.h"
+#include <WinSock2.h>
+#include <Windows.h>
+#include <Shlwapi.h>
+
 class MyProcess
 {
 public:

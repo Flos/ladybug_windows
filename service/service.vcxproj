@@ -45,23 +45,25 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\bin\</OutDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-    <IncludePath>$(PROTOBUF)\vsprojects\include;$(JPG_TURBO)\include;$(LADYBUG)\include;../include;../protobuf;$(BOOST);$(ZMQ)\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(JPG_TURBO)\lib;$(PROTOBUF)\vsprojects\x64\Debug;$(LADYBUG)\lib64;$(BOOST)\lib64-msvc-11.0;$(ZMQ)\lib;$(PROTOBUF)\vsprojects\x64\Debug;$(LibraryPath);$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <IncludePath>$(PROTOBUF)\vsprojects\include;../include;../protobuf;$(BOOST);$(ZMQ)\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(PROTOBUF)\vsprojects\x64\Debug;$(BOOST)\lib64-msvc-11.0;$(ZMQ)\lib;$(LibraryPath);$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
+    <SourcePath>$(SourcePath);../protobuf;</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(PROTOBUF)\vsprojects\include;$(JPG_TURBO)\include;$(LADYBUG)\include;../include;../protobuf;$(BOOST);$(ZMQ)\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(JPG_TURBO)\lib;$(PROTOBUF)\vsprojects\x64\Debug;$(LADYBUG)\lib64;$(BOOST)\lib64-msvc-11.0;$(ZMQ)\lib;$(PROTOBUF)\vsprojects\x64\Debug;$(LibraryPath);$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <IncludePath>$(PROTOBUF)\vsprojects\include;../include;../protobuf;$(BOOST);$(ZMQ)\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(PROTOBUF)\vsprojects\x64\Debug;$(BOOST)\lib64-msvc-11.0;$(ZMQ)\lib;$(PROTOBUF)\vsprojects\x64\Debug;$(LibraryPath);$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSDK_LibraryPath_x64);</LibraryPath>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
     <OutDir>..\bin\</OutDir>
+    <SourcePath>$(SourcePath);../protobuf;</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN64;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsManaged>true</CompileAsManaged>
       <AdditionalOptions>/Zm150</AdditionalOptions>
       <MinimalRebuild>false</MinimalRebuild>
@@ -69,7 +71,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>ladybug.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib;Shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libzmq.lib;libprotobuf.lib;Shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -77,7 +79,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN64;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <CallingConvention />
@@ -90,8 +92,8 @@
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>ladybug.lib;libzmq.lib;libprotobuf.lib;turbojpeg.lib;Shlwapi.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(JPG_TURBO)\lib;$(PROTOBUF)\vsprojects\x64\Release;$(LADYBUG)\lib64;$(BOOST)\lib64-msvc-11.0;$(ZMQ)\lib;$(PROTOBUF)\vsprojects\x64\Debug;%(AdditionalLibraryDirectories;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libzmq.lib;libprotobuf.lib;Shlwapi.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(PROTOBUF)\vsprojects\x64\Release;$(BOOST)\lib64-msvc-11.0;$(ZMQ)\lib;$(PROTOBUF)\vsprojects\x64\Debug;%(AdditionalLibraryDirectories;</AdditionalLibraryDirectories>
       <OutputFile>..\bin\$(ProjectName)_$(Platform)_$(Configuration).exe</OutputFile>
     </Link>
   </ItemDefinitionGroup>
@@ -115,6 +117,7 @@
     <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\protobuf\imageMessage.pb.cc" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="main.cpp" />
@@ -128,11 +131,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ladybug5_lib\ladybug5_windows_lib.vcxproj">
-      <Project>{fec44dd5-2990-4206-ad6c-09adf0e828e8}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -64,6 +64,9 @@
     <ClCompile Include="zmq_service.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="..\protobuf\imageMessage.pb.cc">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico">

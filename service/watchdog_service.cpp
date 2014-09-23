@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "watchdog_service.h"
 
 
