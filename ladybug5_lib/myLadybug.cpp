@@ -1,4 +1,5 @@
 #include "myLadybug.h";
+#include <boost\filesystem.hpp>
 #include <assert.h>;
 
 LadybugError
@@ -19,6 +20,12 @@ LadybugStream::grepNextImage(LadybugImage *image){
 LadybugStream::LadybugStream(LadybugContext& context, std::string filename, bool loop){
     this->loop = loop;
     this->filename = filename;
+
+	if(!boost::filesystem::exists(filename)){
+		std::cout << "File: " << filename << " dosent exits" << std::endl;
+		_ERROR_NORETURN
+	}
+
     this->currentImage = 0;
     error = ladybugCreateStreamContext( &streamContext);
     _ERROR_NORETURN
@@ -183,7 +190,7 @@ Ladybug::isFileStream(){
 }
 
 LadybugError 
-Ladybug::initProcessing(){
+Ladybug::initProcessing(unsigned int cols, unsigned int rows){
     _ERROR
 	// Set the panoramic view angle
 	error = ladybugSetPanoramicViewingAngle( context, LADYBUG_FRONT_0_POLE_5);
@@ -197,14 +204,22 @@ Ladybug::initProcessing(){
     error = ladybugSetColorProcessingMethod( context, config->cfg_ladybug_colorProcessing );
 	_ERROR
 
-    unsigned int uiRawCols = _raw_image.uiCols;
+	unsigned int uiRawCols = _raw_image.uiCols;
 	unsigned int uiRawRows = _raw_image.uiRows;
-    if (config->cfg_ladybug_colorProcessing == LADYBUG_DOWNSAMPLE4 || 
-	        config->cfg_ladybug_colorProcessing == LADYBUG_MONO)
-    {
-	    uiRawCols = _raw_image.uiCols / 2;
-	    uiRawRows = _raw_image.uiRows / 2;
-    }
+
+	if(cols == 0 || rows == 0){
+		
+		if (config->cfg_ladybug_colorProcessing == LADYBUG_DOWNSAMPLE4 || 
+				config->cfg_ladybug_colorProcessing == LADYBUG_MONO)
+		{
+			uiRawCols = _raw_image.uiCols / 2;
+			uiRawRows = _raw_image.uiRows / 2;
+		}
+	}
+	else{
+		uiRawCols = cols;
+		uiRawRows = rows;
+	}
 
     //_buffer = new ArpBuffer(uiRawCols, uiRawRows, 4);
 

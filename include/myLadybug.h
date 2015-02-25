@@ -72,6 +72,7 @@ public:
     LadybugCameraInfo caminfo;
     Configuration* config;
     LadybugError getCameraCalibration(unsigned int camera_index, CameraCalibration* calibration);
+    LadybugError initProcessing(unsigned int cols = 0, unsigned int rows = 0);
     ArpBuffer* getBuffer();
     LadybugContext context;
     LadybugError error;
@@ -86,5 +87,4 @@ private:
     LadybugError start();
     LadybugError initCamera();
     LadybugError Ladybug::initStream(std::string path_streamfile);
-    LadybugError initProcessing();
 };
