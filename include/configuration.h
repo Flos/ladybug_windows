@@ -36,6 +36,7 @@ public:
 	bool is_color_separated();
 	std::string get_color_encoding();
     ~Configuration();
+	void merge( boost::property_tree::ptree& pt, const boost::property_tree::ptree& updates );
 private:
     void init();
     boost::property_tree::ptree pt;

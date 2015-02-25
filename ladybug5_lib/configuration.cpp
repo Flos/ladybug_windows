@@ -4,6 +4,7 @@ Configuration::Configuration(std::string filename){
     init();
     cfg_configFile = filename;
     try{
+		load("config.ini");
         load(filename);
     }catch(std::exception){
         save(filename);
@@ -29,7 +30,9 @@ Configuration::init(){
 
 void 
 Configuration::load(std::string filename){
-    boost::property_tree::ini_parser::read_ini(filename, pt);
+	boost::property_tree::ptree pt_load;
+    boost::property_tree::ini_parser::read_ini(filename, pt_load);
+	merge(pt,pt_load);
     cfg_ros_master = pt.get<std::string>(PATH_ROS_MASTER);
     cfg_transfer_compressed = pt.get<bool>(PATH_TRANSFER_COMPRESSED);
     cfg_fileStream = pt.get<std::string>(PATH_LADYBUG_STREAMFILE);
@@ -41,6 +44,14 @@ Configuration::load(std::string filename){
     cfg_ladybug_dataformat = ladybugDataFormatMap.right.find( pt.get<std::string>(PATH_LB_DATA))->second;
     cfg_ladybug_autoExposureMode = ladybugAutoExposureModeMap.right.find( pt.get<std::string>(PATH_EXPOSURE))->second;
     cfg_ladybug_autoShutterRange = ladybugAutoShutterRangeMap.right.find( pt.get<std::string>(PATH_SHUTTER))->second;
+}
+
+void 
+Configuration::merge( boost::property_tree::ptree& pt, const boost::property_tree::ptree& updates ){
+   BOOST_FOREACH( auto& update, updates )
+   {
+      pt.put_child( update.first, update.second );
+   }
 }
 
 void

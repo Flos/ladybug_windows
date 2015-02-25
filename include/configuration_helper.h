@@ -12,6 +12,7 @@
 #include <boost/bimap.hpp>
 #include <boost/bimap/list_of.hpp>
 #include <boost/assign.hpp>
+#include <boost/foreach.hpp>
 /* Ladybug */
 #include <ladybug.h>
 #include <ladybuggeom.h>

@@ -215,6 +215,14 @@ void createOptionsFile(){
         printf("Creating the option file failed\n");
     }
 }
+void merge( boost::property_tree::ptree& pt, const boost::property_tree::ptree& updates )
+{
+   BOOST_FOREACH( auto& update, updates )
+   {
+	   printf("boost foreach\n");
+      pt.put_child( update.first, update.second );
+   }
+}
 
 void initConfig(int argc, char* argv[]){
 
@@ -225,7 +233,11 @@ void initConfig(int argc, char* argv[]){
     boost::property_tree::ptree pt;
     if(argc > 1){ // load different config files over commandline
         printf("\n\nLoading configfile: %s\n\n",argv[1]);
-        boost::property_tree::ini_parser::read_ini(argv[1], pt);
+        boost::property_tree::ini_parser::read_ini("config.ini", pt);
+		boost::property_tree::ptree pt2;
+		boost::property_tree::ini_parser::read_ini(argv[1], pt2);
+		printf("\n\nmerge: %s\n\n",argv[1]);
+		merge(pt,pt2);
         loadConfigsFromPtree(&pt);
     }
     else{
