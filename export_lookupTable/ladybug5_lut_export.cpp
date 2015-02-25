@@ -39,9 +39,11 @@ void fillMap(unsigned int h, unsigned int w, cv::Mat &mat_x, cv::Mat &mat_y, Lad
 
 void save(cv::Mat &mat_x, cv::Mat &mat_y, std::string filename, CameraCalibration calib, int camera){
 	std::cout << "Exporting " << filename << std::endl; 
+	std::cout << "Focal: " << calib.focal_lenght <<std::endl;
+	std::cout << "center: " << calib.centerX << " " << calib.centerY << std::endl;
 
 	{
-		cv::FileStorage fs(filename+".yaml", cv::FileStorage::WRITE);
+		cv::FileStorage fs(filename+".yaml.gz", cv::FileStorage::WRITE);
 		fs << "camera" << camera;
 		fs << "centerX" << calib.centerX;
 		fs << "centerY" << calib.centerY;
@@ -71,6 +73,17 @@ void save(cv::Mat &mat_x, cv::Mat &mat_y, std::string filename, CameraCalibratio
 		fs << "translationX" << calib.translationX;
 		fs << "translationY" << calib.translationY;
 		fs << "translationZ" << calib.translationZ;
+		fs << "centerXY" << "[";
+		fs << calib.centerX;
+		fs << calib.centerY;
+		fs << "]";
+		fs << "focalXY" << "[";
+		fs << calib.focal_lenght;
+		fs << calib.focal_lenght;
+		fs << "]";
+		fs << "EulerRotXYZ" << "[" << calib.rotationX << calib.rotationY << calib.rotationZ << "]";
+		fs << "TransXYZ" << "[" << calib.translationX << calib.translationY << calib.translationZ << "]";
+		fs << "tf_xyz_eulerXYZ" << "[" << calib.translationX << calib.translationY << calib.translationZ << calib.rotationX << calib.rotationY << calib.rotationZ << "]";
 		fs.release();
 	}
 
@@ -117,7 +130,7 @@ void main( int argc, char* argv[] ){
 	double t_now = clock();
 	//initConfig(0, argv);
 	//std::cout << std::endl << "Number of Cores: " << boost::thread::hardware_concurrency() << std::endl;  
-	printf("\nStarting ladybug calibration exporter...\n");
+	printf("Starting ladybug calibration exporter...\n");
 
 	Configuration config;
 	if(argc < 1){
@@ -132,10 +145,10 @@ void main( int argc, char* argv[] ){
 	config.cfg_rectification = false;
 	config.cfg_panoramic = false;
 	//config.cfg_fileStream = "input/jpg8_ladybug-000000.pgr";
-	//config.cfg_ladybug_colorProcessing = LADYBUG_HQLINEAR;
+	config.cfg_ladybug_colorProcessing = LADYBUG_HQLINEAR;
 
 	Ladybug lady;
-	lady.init(&config);
+	lady.init(&config, false);
 
 	int cols = 1224;
 	int rows = 1024;
@@ -158,15 +171,8 @@ void main( int argc, char* argv[] ){
 		rows = 0;
 	}
 
-	
-
-	
-	//error = ladybugConfigureOutputImages( lady.context, LADYBUG_ALL_RECTIFIED_IMAGES );
-	//error = ladybugSetOffScreenImageSize( lady.context, LADYBUG_ALL_RECTIFIED_IMAGES, cols, rows);
- //       
- //       // Configure output images in Ladybug library
- //   error = ladybugInitializeAlphaMasks( lady.context, cols, rows );
 	lady.config->cfg_rectification = true;
+	lady.initialised_processing = true;
 	error = lady.initProcessing(cols, rows);
 	
 
@@ -179,24 +185,22 @@ void main( int argc, char* argv[] ){
 	_TIME
 		double t_loopstart = t_now;
 	for(unsigned int camera = 0; camera < LADYBUG_NUM_CAMERAS; ++camera){
+
+		//LadybugProcessedImage rectified; 
+		//error = lady.grabProcessedImage(&rectified, (LadybugOutputImage) (1 << (6+camera)) );
+
 		error = lady.getCameraCalibration(camera, &calibration);
-		std::cout << "Camera: " << camera << std::endl;
+		std::cout << "\nExporting camera: " << camera << std::endl;
 
-		LadybugProcessedImage rectified; 
-		error = lady.grabProcessedImage(&rectified, (LadybugOutputImage) (1 << (6+camera)) );
-
-		unsigned int h = rectified.uiRows;
-		unsigned int w = rectified.uiCols;
+		unsigned int h = lady.rectified_image_height; //rectified.uiRows;
+		unsigned int w = lady.rectified_images_width; //rectified.uiCols;
 		std::cout << "H: " << h << " W: " << w << std::endl;
 
 		//ArpBuffer* buffer = lady.getBuffer();
 		//unsigned int data_size;
 
-	/*	cv::Mat image_raw_RGB = cv::Mat( h, w, CV_8UC3, rectified.pData);
-		imshow("teset",image_raw_RGB);
-		
-			cv::waitKey();
-			Sleep(1);*/
+		//cv::Mat image_raw_RGB = cv::Mat( h, w, CV_8UC3, rectified.pData);
+	
 		//cv::Mat image_rectified_raw(rectified.uiRows, rectified.uiCols, CV_8UC3, rectified.pData);
 		////cv::Mat image_raw_RGB;
 		////cv::cvtColor(image_raw_RGBA, image_raw_RGB, CV_RGBA2RGB);
@@ -207,7 +211,7 @@ void main( int argc, char* argv[] ){
 		size.height = h;
 		size.width = w;
 
-		cv::Mat imageUndistorted(size,CV_8UC3);
+		cv::Mat imageUndistorted(size, CV_8UC3);
 		cv::Mat morph_mat_x(h, w, CV_32FC1);
 		cv::Mat morph_mat_y(h, w, CV_32FC1);
 
@@ -224,6 +228,12 @@ void main( int argc, char* argv[] ){
 			cv::imshow("Rectified with map defaut cam" + std::to_string(camera), imageUndistorted); 
 			cv::imshow("diff cam" + std::to_string(camera), diff); 
 		}*/
+
+		//imshow("teset",image_raw_RGB);
+		
+		cv::waitKey();
+		Sleep(2000);
+
 		status = "loop camera" + std::to_string(camera);
 		_TIME
 	}
@@ -233,8 +243,8 @@ void main( int argc, char* argv[] ){
 		/*if(show_images){ 
 			cv::waitKey();
 		}*/
-		std::printf("<PRESS ANY KEY TO EXIT>");
-		_getch();
+		//std::printf("<PRESS ANY KEY TO EXIT>");
+		//_getch();
 
 		return;
 }

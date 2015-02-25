@@ -65,7 +65,7 @@ public:
 class Ladybug{
 public:
     Ladybug();
-	void init(Configuration* config = NULL);
+	void init(Configuration* config = NULL, bool init_processing = true);
     ~Ladybug();
     LadybugError grabImage(LadybugImage* image);
     LadybugError grabProcessedImage(LadybugProcessedImage* image, LadybugOutputImage imageType);
@@ -78,13 +78,17 @@ public:
     LadybugError error;
     bool isFileStream();
     double getCycleTime();
+    bool initialised_processing;
+	int rectified_images_width;
+	int rectified_image_height;
+	void calculate_rectified_image_size(unsigned int cols = 0, unsigned int rows=0);
+	LadybugError set_rectification_image_size(unsigned int cols, unsigned int rows);
 private:
     LadybugStream* _stream;
     ArpBuffer* _buffer;
     LadybugImage _raw_image;
     bool images_processed;
-    bool initialised_processing;
-    LadybugError start();
+    LadybugError start(bool init_processing = true);
     LadybugError initCamera();
     LadybugError Ladybug::initStream(std::string path_streamfile);
 };

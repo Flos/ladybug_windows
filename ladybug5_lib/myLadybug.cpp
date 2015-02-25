@@ -83,7 +83,7 @@ ArpBuffer::~ArpBuffer(){
 };
 
 void 
-Ladybug::init(Configuration* config){
+Ladybug::init(Configuration* config, bool init_processing ){
 
 	if(config == NULL){
         this->config = config;
@@ -107,9 +107,9 @@ Ladybug::init(Configuration* config){
 	{     
 		throw new std::exception(::ladybugErrorToString( error ));
 	}
-	
-    error = start();
-    _ERROR_NORETURN
+
+	error = start(init_processing);
+	_ERROR_NORETURN
 }
 
 
@@ -118,6 +118,8 @@ Ladybug::Ladybug(){
     _stream = NULL;
     images_processed = false;
     initialised_processing = false;
+	rectified_images_width = 0;
+	rectified_image_height = 0;
 };
 
 LadybugError 
@@ -204,22 +206,7 @@ Ladybug::initProcessing(unsigned int cols, unsigned int rows){
     error = ladybugSetColorProcessingMethod( context, config->cfg_ladybug_colorProcessing );
 	_ERROR
 
-	unsigned int uiRawCols = _raw_image.uiCols;
-	unsigned int uiRawRows = _raw_image.uiRows;
-
-	if(cols == 0 || rows == 0){
-		
-		if (config->cfg_ladybug_colorProcessing == LADYBUG_DOWNSAMPLE4 || 
-				config->cfg_ladybug_colorProcessing == LADYBUG_MONO)
-		{
-			uiRawCols = _raw_image.uiCols / 2;
-			uiRawRows = _raw_image.uiRows / 2;
-		}
-	}
-	else{
-		uiRawCols = cols;
-		uiRawRows = rows;
-	}
+	calculate_rectified_image_size(cols, rows);
 
     //_buffer = new ArpBuffer(uiRawCols, uiRawRows, 4);
 
@@ -244,21 +231,50 @@ Ladybug::initProcessing(unsigned int cols, unsigned int rows){
             //  
             // Rectified images
             //   
-            error = ladybugSetOffScreenImageSize(
-                context,
-                LADYBUG_ALL_RECTIFIED_IMAGES, 
-                uiRawCols, 
-                uiRawRows);
-        }
-         // Configure output images in Ladybug library
-	   
-        error = ladybugInitializeAlphaMasks( context, uiRawCols, uiRawRows );
+			error = set_rectification_image_size(rectified_images_width, rectified_image_height);
+			_ERROR
+        }	   
+        error = ladybugInitializeAlphaMasks( context, rectified_images_width, rectified_image_height );
         _ERROR;
     }
 
     initialised_processing = true;
 
 	return error;
+}
+
+LadybugError
+Ladybug::set_rectification_image_size(unsigned int cols, unsigned int rows){
+	 error = ladybugSetOffScreenImageSize(
+                context,
+                LADYBUG_ALL_RECTIFIED_IMAGES, 
+                cols, 
+                rows);
+
+	rectified_images_width = cols;
+	rectified_image_height = rows;
+
+	return error;
+}
+
+void 
+Ladybug::calculate_rectified_image_size(unsigned int cols, unsigned int rows){
+	rectified_images_width = _raw_image.uiCols;
+	rectified_image_height = _raw_image.uiRows;
+
+	if(cols == 0 || rows == 0){
+		
+		if (config->cfg_ladybug_colorProcessing == LADYBUG_DOWNSAMPLE4 || 
+				config->cfg_ladybug_colorProcessing == LADYBUG_MONO)
+		{
+			rectified_images_width = _raw_image.uiCols / 2;
+			rectified_image_height = _raw_image.uiRows / 2;
+		}
+	}
+	else{
+		rectified_images_width = cols;
+		rectified_image_height = rows;
+	}
 }
 
 double 
@@ -293,13 +309,16 @@ Ladybug::getCycleTime(){
 
 /* Ladybug live and filestream */
 LadybugError 
-Ladybug::start(){
-	printf("Starting %s (%u)...\n", caminfo.pszModelName, caminfo.serialHead);
+Ladybug::start( bool init_processing ){
+	printf("Starting Ladybug5 %d ...\n", caminfo.serialHead);
 	_ERROR
     error = grabImage(&_raw_image);
     _ERROR
-    error = initProcessing();
-    _ERROR
+
+	if(init_processing){
+		error = initProcessing();
+		_ERROR
+	}
 
 	return error;
 }
@@ -308,6 +327,10 @@ LadybugError
 Ladybug::getCameraCalibration(unsigned int camera_index, CameraCalibration* calibration){
     _ERROR
     if(!initialised_processing){ initProcessing(); };
+
+	error = set_rectification_image_size(rectified_images_width, rectified_image_height); // make sure we get the right informations
+	_ERROR
+
     double extrinsics[6];
     error = ladybugGetCameraUnitExtrinsics(context, camera_index, extrinsics);
     _ERROR
@@ -354,6 +377,7 @@ Ladybug::getBuffer(){
     
 
 Ladybug::~Ladybug(){
+	std::cout << "Ladybug destructor" << std::endl;
     ladybugDestroyContext( &context);
     if(_stream != NULL) delete _stream;
     if(_buffer != NULL) delete _buffer;
