@@ -63,7 +63,7 @@ GrabSend::init(zmq::context_t* zmq_context)
 	_TIME
     
     std::string connection;
-    int socket_type = ZMQ_PUB;
+	int socket_type = ZMQ_PUB;
     bool zmq_bind = false;
  
     connection = cfg_ros_master.c_str();
@@ -71,7 +71,7 @@ GrabSend::init(zmq::context_t* zmq_context)
     status = "connect with zmq to " + connection;
 
 	socket = new zmq::socket_t(*zmq_context, socket_type);
-	int val = 6; //buffer size
+	int val = 2; //buffer size
 	socket->setsockopt(ZMQ_RCVHWM, &val, sizeof(val));  //prevent buffer get overfilled
 	socket->setsockopt(ZMQ_SNDHWM, &val, sizeof(val));  //prevent buffer get overfilled
         
@@ -180,10 +180,10 @@ GrabSend::loop(){
                      
 					//RGB expected at reciever
 					// Red = Index + 3
-					send_image(index+red_offset, &image, socket, flag);
+					send_image(index+red_offset, &image, socket, ZMQ_SNDMORE);
 
 					// Green = Index + 1 || 2
-					send_image(index+green_offset, &image, socket, flag);
+					send_image(index+green_offset, &image, socket, ZMQ_SNDMORE);
 
 					// Blue = Index 0
         			send_image(index+blue_offset, &image, socket, flag);
