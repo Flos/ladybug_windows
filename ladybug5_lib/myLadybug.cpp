@@ -377,7 +377,6 @@ Ladybug::getBuffer(){
     
 
 Ladybug::~Ladybug(){
-	std::cout << "Ladybug destructor" << std::endl;
     ladybugDestroyContext( &context);
     if(_stream != NULL) delete _stream;
     if(_buffer != NULL) delete _buffer;

@@ -13,6 +13,7 @@
 #include <opencv/highgui.h>
 #include <Windows.h>
 #include <WinBase.h>
+#include <boost/filesystem.hpp>
 
 bool show_images = false;
 
@@ -37,24 +38,22 @@ void fillMap(unsigned int h, unsigned int w, cv::Mat &mat_x, cv::Mat &mat_y, Lad
 	}
 }
 
-void save(cv::Mat &mat_x, cv::Mat &mat_y, std::string filename, CameraCalibration calib, int camera){
-	std::cout << "Exporting " << filename << std::endl; 
-	std::cout << "Focal: " << calib.focal_lenght <<std::endl;
-	std::cout << "center: " << calib.centerX << " " << calib.centerY << std::endl;
-
+void save(cv::Mat &mat_x, cv::Mat &mat_y, std::string filename, CameraCalibration calib, int camera, int height, int width){
 	{
 		cv::FileStorage fs(filename+".yaml.gz", cv::FileStorage::WRITE);
 		fs << "camera" << camera;
-		fs << "centerX" << calib.centerX;
-		fs << "centerY" << calib.centerY;
-		fs << "focal_lenghtX" << calib.focal_lenght;
-		fs << "focal_lenghtY" << calib.focal_lenght;
-		fs << "rotationX" << calib.rotationX;
-		fs << "rotationY" << calib.rotationY;
-		fs << "rotationZ" << calib.rotationZ;
-		fs << "translationX" << calib.translationX;
-		fs << "translationY" << calib.translationY;
-		fs << "translationZ" << calib.translationZ;
+		fs << "width" << width;
+		fs << "height" << height;
+		fs << "cx" << calib.centerX;
+		fs << "cy" << calib.centerY;
+		fs << "fx" << calib.focal_lenght;
+		fs << "fy" << calib.focal_lenght;
+		fs << "rx" << calib.rotationX;
+		fs << "ry" << calib.rotationY;
+		fs << "rz" << calib.rotationZ;
+		fs << "x" << calib.translationX;
+		fs << "y" << calib.translationY;
+		fs << "z" << calib.translationZ;
 		fs << "remap_x" << mat_x;
 		fs << "remap_y" << mat_y;
 		fs.release();
@@ -63,28 +62,45 @@ void save(cv::Mat &mat_x, cv::Mat &mat_y, std::string filename, CameraCalibratio
 	{
 		cv::FileStorage fs(filename+"_calib.yaml", cv::FileStorage::WRITE);
 		fs << "camera" << camera;
-		fs << "centerX" << calib.centerX;
-		fs << "centerY" << calib.centerY;
-		fs << "focal_lenghtX" << calib.focal_lenght;
-		fs << "focal_lenghtY" << calib.focal_lenght;
-		fs << "rotationX" << calib.rotationX;
-		fs << "rotationY" << calib.rotationY;
-		fs << "rotationZ" << calib.rotationZ;
-		fs << "translationX" << calib.translationX;
-		fs << "translationY" << calib.translationY;
-		fs << "translationZ" << calib.translationZ;
-		fs << "centerXY" << "[";
-		fs << calib.centerX;
-		fs << calib.centerY;
-		fs << "]";
-		fs << "focalXY" << "[";
-		fs << calib.focal_lenght;
-		fs << calib.focal_lenght;
-		fs << "]";
-		fs << "EulerRotXYZ" << "[" << calib.rotationX << calib.rotationY << calib.rotationZ << "]";
-		fs << "TransXYZ" << "[" << calib.translationX << calib.translationY << calib.translationZ << "]";
-		fs << "tf_xyz_eulerXYZ" << "[" << calib.translationX << calib.translationY << calib.translationZ << calib.rotationX << calib.rotationY << calib.rotationZ << "]";
+		fs << "width" << width;
+		fs << "height" << height;
+		fs << "cx" << calib.centerX;
+		fs << "cy" << calib.centerY;
+		fs << "fx" << calib.focal_lenght;
+		fs << "fy" << calib.focal_lenght;
+		fs << "rx" << calib.rotationX;
+		fs << "ry" << calib.rotationY;
+		fs << "rz" << calib.rotationZ;
+		fs << "x" << calib.translationX;
+		fs << "y" << calib.translationY;
+		fs << "z" << calib.translationZ;
 		fs.release();
+	}
+
+	{
+		std::string tab = "\t";
+		std::ofstream file_calib_txt;
+		std::string filename = "calib_table_camera_" + std::to_string(camera) + ".txt";
+
+		bool file_exists = boost::filesystem::exists(filename);
+
+		file_calib_txt.open (filename, std::ios::app);
+		if(!file_exists){
+			file_calib_txt << "camera" << tab << "height" << tab << "width" << tab 
+				<< "cx" << tab << "cy" << tab 
+				<< "fx" << tab << "fy" << tab 
+				<< "x" << tab << "y" << tab << "z" << tab 
+				<< "rx" << tab << "ry" << tab << "rz" << std::endl;
+		}
+
+		file_calib_txt << camera << tab 
+			<< height << tab << width << tab
+			<< calib.centerX << tab << calib.centerY << tab 
+			<< calib.focal_lenght << tab << calib.focal_lenght << tab
+			<< calib.translationX << tab << calib.translationY << tab << calib.translationZ << tab 
+			<< calib.rotationX << tab << calib.rotationY << tab << calib.rotationZ << std::endl;
+		
+		file_calib_txt.close();
 	}
 
 }
@@ -121,7 +137,7 @@ void createCalibrationMaps(unsigned int h, unsigned int w, unsigned int camera, 
 	CameraCalibration cam;
 	lady.getCameraCalibration(camera, &cam);
 
-	save(reduced_map_x, reduced_map_y, filename.c_str(), cam, camera);
+	save(reduced_map_x, reduced_map_y, filename.c_str(), cam, camera, h, w);
 }
 
 void main( int argc, char* argv[] ){   
@@ -159,22 +175,25 @@ void main( int argc, char* argv[] ){
 		std::cout << "factor " << factor << std::endl;
 		rows = atoi(argv[2]);
 		cols = (double)rows * factor;
-		std::cout << "Image size set to H: " << rows << " W: " << cols << std::endl;
+		std::cout << "Image size set to W: " << cols << " H: " << rows << std::endl;
 	}
 	else if(argc == 4){
 		rows = atoi(argv[2]);
 		cols = atoi(argv[3]);
-		std::cout << "Image size set to H: " << rows << " W: " << cols << std::endl;
+		std::cout << "Image size set to W: " << cols << " H: " << rows << std::endl;
 	}
 	else{
 		cols = 0;
 		rows = 0;
 	}
 
+	_TIME
 	lady.config->cfg_rectification = true;
 	lady.initialised_processing = true;
 	error = lady.initProcessing(cols, rows);
 	
+	status = "init procssing";
+	_TIME
 
 	//Get ladybug calibration
 	CameraCalibration calibration;
@@ -183,18 +202,22 @@ void main( int argc, char* argv[] ){
 	error = lady.grabImage(&image);
 
 	_TIME
-		double t_loopstart = t_now;
+	double t_loopstart = t_now;
+	std::string tab = "\t";
+	
+	std::cout << "camera" << tab << "w" << tab << "h" << tab << "f" << tab << "cx" << tab << "cy" << tab << "time" << std::endl;
+	std::cout.flush();
+
 	for(unsigned int camera = 0; camera < LADYBUG_NUM_CAMERAS; ++camera){
 
 		//LadybugProcessedImage rectified; 
 		//error = lady.grabProcessedImage(&rectified, (LadybugOutputImage) (1 << (6+camera)) );
-
-		error = lady.getCameraCalibration(camera, &calibration);
-		std::cout << "\nExporting camera: " << camera << std::endl;
-
+		
 		unsigned int h = lady.rectified_image_height; //rectified.uiRows;
 		unsigned int w = lady.rectified_images_width; //rectified.uiCols;
-		std::cout << "H: " << h << " W: " << w << std::endl;
+
+		error = lady.getCameraCalibration(camera, &calibration);
+		std::cout << camera << tab << w << tab << h << tab << calibration.focal_lenght << tab << calibration.centerX << tab << calibration.centerY << tab;
 
 		//ArpBuffer* buffer = lady.getBuffer();
 		//unsigned int data_size;
@@ -231,11 +254,12 @@ void main( int argc, char* argv[] ){
 
 		//imshow("teset",image_raw_RGB);
 		
-		cv::waitKey();
-		Sleep(2000);
-
 		status = "loop camera" + std::to_string(camera);
 		_TIME
+
+		/*cv::waitKey();
+		Sleep(2000);
+*/
 	}
 	status = "Total time in loop";
 	t_now=t_loopstart;
