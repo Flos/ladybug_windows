@@ -104,6 +104,13 @@ _RESTART:
         _HANDLE_ERROR
       }
 
+	
+	LadybugImageRenderingInfo graphics_info;
+
+	ladybugGetImageRenderingInfo  ( context, &graphics_info); 
+	printf("Graphic info: %s\nRenderbuffer size: %i maxTextureSize %i\nMax viewport: width %i height %i\nmemory size %i\n", graphics_info.pszAdapterString, 
+		graphics_info.uiMaxRenderbufferSize, graphics_info.uiMaxTextureSize, graphics_info.uiMaxViewPortWidth, graphics_info.uiMaxViewPortWidth,graphics_info.uiMemorySize);
+
 	status = "configure for panoramic stitching";
 	error = configureLadybugForPanoramic(context);
 	_HANDLE_ERROR
@@ -136,7 +143,7 @@ _RESTART:
 
     { 
         std::string connection;
-        int socket_type = ZMQ_PUB;
+		int socket_type = ZMQ_PUB;
         bool zmq_bind = false;
 
        
@@ -238,14 +245,14 @@ _RESTART:
                 image_msg->set_border_top(0);
                 image_msg->set_border_bottem(0);
 				image_msg->set_packages(1);
-				image_msg->set_bayer_encoding("BGR8");
+				image_msg->set_bayer_encoding("bgr8");
 				if(cfg_transfer_compressed){
 					image_msg->set_color_encoding("jpg");
 				}
 				else{
 					image_msg->set_color_encoding("raw");
 				}
-				image_msg->set_depth(getDataBitDepth(&image));
+				//image_msg->set_depth(getDataBitDepth(&image));
 
 
                 pb_send(socket, &message, ZMQ_SNDMORE);
