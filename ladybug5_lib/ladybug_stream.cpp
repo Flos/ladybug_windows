@@ -90,6 +90,31 @@ void extractImagesToFiles(LadybugImage* image){
     }    
 }
 
+void* getImagePointer(LadybugImage* image, unsigned int i, unsigned int& size){
+    unsigned int imgCount = getImageCount(image);
+
+    if(isColorSeparated(image))
+    {
+        jpgPositionAndSize jpg;
+        unsigned int offset = 0x0340 + i*8;
+        unsigned int image_offset = *(unsigned int*)&image->pData[offset];
+        unsigned int image_size = *(unsigned int*)&image->pData[offset+4];
+        jpg.size = BigLiltleEndianSwap(image_size); // jpg size and offset is stored in big endian
+        jpg.offset = BigLiltleEndianSwap(image_offset); // jpg size and offset is stored in big endian
+
+        size =  jpg.size;
+        return  (char*)&image->pData[jpg.offset];
+    }
+    else{
+        unsigned int resolution = image->uiFullCols*image->uiFullRows;
+        unsigned int imagesize = (double)resolution * ((double)getDataBitDepth(image)/8);
+        unsigned int offset = imagesize*i;
+
+        size =  imagesize;
+        return (char*)&image->pData[offset];
+    }    
+}
+
 void extractImageToMsg(LadybugImage* image, unsigned int i, char** begin, unsigned int& size){
     unsigned int imgCount = getImageCount(image);
     if(isColorSeparated(image))
@@ -133,6 +158,26 @@ unsigned int getDataBitDepth(LadybugImage* image){
                 break;
             default:
                 throw new std::exception("bit size can not be dettermined");
+     }
+}
+
+unsigned int getDataBitDepth(LadybugProcessedImage* image){
+	switch(image->pixelFormat){
+	case LADYBUG_MONO8:
+	case LADYBUG_RAW8:
+	case LADYBUG_BGR: 
+	case LADYBUG_BGRU: 
+		return 8;
+	case LADYBUG_MONO16:
+	case LADYBUG_RAW16: 
+	case LADYBUG_BGR16:
+	case LADYBUG_BGRU16: 
+	case LADYBUG_BGR16F: 
+		return 16;
+	case LADYBUG_BGR32F:
+		return 32; 
+        default:
+            throw new std::exception("bit size can not be dettermined");
      }
 }
 
